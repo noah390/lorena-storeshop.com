@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <link rel="stylesheet" href="css/presidential.css">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <!-- <link rel="stylesheet" href="/style.css"> -->
-    <title> E-COMMERCE WEBSITE BY EDYODA | CREATED BY PRIYANKA SHARMA </title>
+    <title> Lorena Store - Fashion & Accessories </title>
     <!-- favicon -->
     <link rel="icon" href="https://yt3.ggpht.com/a/AGF-l78km1YyNXmF0r3-0CycCA0HLA_i6zYn_8NZEg=s900-c-k-c0xffffffff-no-rj-mo" type="image/gif" sizes="16x16">
     <!-- header links -->
@@ -16,9 +17,61 @@
     <script src="js/jQuery3.4.1.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.9.0/slick.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.9.0/slick-theme.min.css">
+    <style>
+        .auth-buttons {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            gap: 10px;
+        }
+        .auth-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 25px;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+        .login-btn {
+            background: transparent;
+            color: #e75480;
+            border: 2px solid #e75480;
+        }
+        .login-btn:hover {
+            background: #e75480;
+            color: white;
+        }
+        .signup-btn {
+            background: #e75480;
+            color: white;
+        }
+        .signup-btn:hover {
+            background: #d63384;
+            transform: translateY(-2px);
+        }
+        .user-welcome {
+            background: rgba(255,255,255,0.9);
+            padding: 8px 16px;
+            border-radius: 20px;
+            color: #e75480;
+            font-weight: 500;
+        }
+    </style>
 </head>
 
 <body>
+    <!-- Auth Buttons -->
+    <div class="auth-buttons" id="authButtons">
+        <a href="login.html" class="auth-btn login-btn">Login</a>
+        <a href="register.html" class="auth-btn signup-btn">Sign Up</a>
+    </div>
+    
+    <div class="auth-buttons" id="userWelcome" style="display: none;">
+        <span class="user-welcome" id="welcomeText">Welcome!</span>
+    </div>
     <!-- HEADER -->
     <div id="1"></div>
     <script>
@@ -91,5 +144,28 @@
 
 <!-- content JS -->
 <script src="content.js"></script>
+
+<script>
+// Check if user is logged in and update auth buttons
+document.addEventListener('DOMContentLoaded', function() {
+    const currentUser = localStorage.getItem('currentUser');
+    const authButtons = document.getElementById('authButtons');
+    const userWelcome = document.getElementById('userWelcome');
+    const welcomeText = document.getElementById('welcomeText');
+    
+    if (currentUser) {
+        try {
+            const user = JSON.parse(currentUser);
+            authButtons.style.display = 'none';
+            userWelcome.style.display = 'flex';
+            welcomeText.textContent = `Welcome, ${user.name || user.identifier}!`;
+            welcomeText.onclick = () => window.location.href = 'profile.html';
+            welcomeText.style.cursor = 'pointer';
+        } catch (e) {
+            localStorage.removeItem('currentUser');
+        }
+    }
+});
+</script>
 
 </html>

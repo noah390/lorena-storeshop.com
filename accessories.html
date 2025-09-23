@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accessories | Lorena Store</title>
+    <link rel="stylesheet" href="css/content.css">
+</head>
+<body>
+    <script src="js/auth.js"></script>
+    <!-- HEADER -->
+    <div id="1"></div>
+    <script>
+        load("header.html");
+        function load(url) {
+            req = new XMLHttpRequest();
+            req.open("GET", url, false);
+            req.send(null);
+            document.getElementById(1).innerHTML = req.responseText;
+        }
+    </script>
+
+    <!-- Page Banner -->
+    <div style="background: linear-gradient(135deg, #ffb347 0%, #e75480 100%); color: white; text-align: center; padding: 60px 20px; margin-bottom: 40px;">
+        <h1 style="font-size: 3.5em; margin-bottom: 15px; font-family: 'Pacifico', cursive;"><i class="fas fa-gem"></i> Accessories Collection</h1>
+        <p style="font-size: 1.3em; opacity: 0.9;">Complete your style with our premium accessories for men and women</p>
+        <div style="margin-top: 20px;">
+            <span style="background: rgba(255,255,255,0.2); padding: 8px 16px; border-radius: 20px; margin: 0 10px;"><i class="fas fa-watch"></i> Watches</span>
+            <span style="background: rgba(255,255,255,0.2); padding: 8px 16px; border-radius: 20px; margin: 0 10px;"><i class="fas fa-glasses"></i> Sunglasses</span>
+            <span style="background: rgba(255,255,255,0.2); padding: 8px 16px; border-radius: 20px; margin: 0 10px;"><i class="fas fa-ring"></i> Jewelry</span>
+        </div>
+    </div>
+
+    <div id="mainContainer">
+        <!-- Filter Section -->
+        <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 30px; text-align: center;">
+            <h3 style="color: #e75480; margin-bottom: 15px;"><i class="fas fa-filter"></i> Shop by Category</h3>
+            <div style="display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;">
+                <button id="allBtn" onclick="filterCategory('all')" style="background: #e75480; color: white; border: none; padding: 10px 20px; border-radius: 25px; cursor: pointer; transition: background 0.2s;">All Accessories</button>
+                <button id="watchesBtn" onclick="filterCategory('watches')" style="background: #6c757d; color: white; border: none; padding: 10px 20px; border-radius: 25px; cursor: pointer; transition: background 0.2s;">Watches</button>
+                <button id="bagsBtn" onclick="filterCategory('bags')" style="background: #6c757d; color: white; border: none; padding: 10px 20px; border-radius: 25px; cursor: pointer; transition: background 0.2s;">Bags</button>
+                <button id="jewelryBtn" onclick="filterCategory('jewelry')" style="background: #6c757d; color: white; border: none; padding: 10px 20px; border-radius: 25px; cursor: pointer; transition: background 0.2s;">Jewelry</button>
+            </div>
+        </div>
+
+        <div id="containerAccessories"></div>
+    </div>
+
+    <!-- FOOTER -->
+    <div id="4"></div>
+    <script>
+        load("footer.html");
+        function load(url) {
+            req = new XMLHttpRequest();
+            req.open("GET", url, false);
+            req.send(null);
+            document.getElementById(4).innerHTML = req.responseText;
+        }
+    </script>
+
+    <script src="content.js"></script>
+    <script>
+        let allProducts = [];
+        
+        // Load all products and show accessories by default
+        document.addEventListener('DOMContentLoaded', function() {
+            fetch('http://localhost:4000/api/products')
+                .then(res => res.json())
+                .then(products => {
+                    allProducts = products;
+                    filterCategory('all');
+                })
+                .catch(err => console.log('Failed to load products'));
+        });
+        
+        function filterCategory(category) {
+            const container = document.getElementById('containerAccessories');
+            if(container && allProducts.length > 0) {
+                container.innerHTML = '';
+                let filteredProducts;
+                
+                if(category === 'all') {
+                    filteredProducts = allProducts.filter(p => p.isAccessory);
+                } else {
+                    filteredProducts = allProducts.filter(p => p.category === category);
+                }
+                
+                filteredProducts.forEach(product => {
+                    container.appendChild(dynamicClothingSection(product));
+                });
+                
+                // Update button styles
+                document.querySelectorAll('button[id$="Btn"]').forEach(btn => {
+                    btn.style.background = '#6c757d';
+                });
+                document.getElementById(category === 'all' ? 'allBtn' : category + 'Btn').style.background = '#e75480';
+            }
+        }
+    </script>
+</body>
+</html>

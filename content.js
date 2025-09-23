@@ -2,6 +2,14 @@
 
 let contentTitle;
 
+// Update cart badge function
+function updateCartBadge() {
+    const cart = JSON.parse(localStorage.getItem('cart') || '{}');
+    const totalItems = Object.values(cart).reduce((a, b) => a + b, 0);
+    const badge = document.getElementById('badge');
+    if (badge) badge.textContent = totalItems;
+}
+
 console.log(document.cookie);
 function dynamicClothingSection(ob) {
   let boxDiv = document.createElement("div");
@@ -9,7 +17,7 @@ function dynamicClothingSection(ob) {
 
   let boxLink = document.createElement("a");
   // boxLink.href = '#'
-  boxLink.href = "/contentDetails.html?" + ob.id;
+  boxLink.href = "contentDetails.html?" + ob.id;
   // console.log('link=>' + boxLink);
 
   let imgTag = document.createElement("img");
@@ -29,7 +37,7 @@ function dynamicClothingSection(ob) {
   h4.appendChild(h4Text);
 
   let h2 = document.createElement("h2");
-  let h2Text = document.createTextNode("rs  " + ob.price);
+  let h2Text = document.createTextNode("₦" + ob.price);
   h2.appendChild(h2Text);
 
   boxDiv.appendChild(boxLink);
@@ -68,12 +76,12 @@ httpRequest.onreadystatechange = function() {
       for (let i = 0; i < contentTitle.length; i++) {
         if (contentTitle[i].isAccessory) {
           console.log(contentTitle[i]);
-          containerAccessories.appendChild(
+          if(containerAccessories) containerAccessories.appendChild(
             dynamicClothingSection(contentTitle[i])
           );
         } else {
           console.log(contentTitle[i]);
-          containerClothing.appendChild(
+          if(containerClothing) containerClothing.appendChild(
             dynamicClothingSection(contentTitle[i])
           );
         }
@@ -85,7 +93,38 @@ httpRequest.onreadystatechange = function() {
 };
 httpRequest.open(
   "GET",
-  "https://5d76bf96515d1a0014085cf9.mockapi.io/product",
+  "http://localhost:4000/api/products",
   true
 );
 httpRequest.send();
+
+// Functions for specific page rendering
+function renderAccessories() {
+  fetch('http://localhost:4000/api/products')
+    .then(res => res.json())
+    .then(products => {
+      const container = document.getElementById('containerAccessories');
+      if(container) {
+        container.innerHTML = '';
+        products.filter(p => p.isAccessory).forEach(product => {
+          container.appendChild(dynamicClothingSection(product));
+        });
+      }
+    })
+    .catch(err => console.log('Failed to load accessories'));
+}
+
+function renderClothing() {
+  fetch('http://localhost:4000/api/products')
+    .then(res => res.json())
+    .then(products => {
+      const container = document.getElementById('containerClothing');
+      if(container) {
+        container.innerHTML = '';
+        products.filter(p => !p.isAccessory).forEach(product => {
+          container.appendChild(dynamicClothingSection(product));
+        });
+      }
+    })
+    .catch(err => console.log('Failed to load clothing'));
+}

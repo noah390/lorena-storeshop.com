@@ -1,0 +1,17 @@
+{
+  "name": "lorena-store",
+  "version": "1.0.0",
+  "description": "Lorena Store - Fashion & Accessories E-commerce Website",
+  "main": "index.html",
+  "scripts": {
+    "dev": "vercel dev",
+    "build": "echo 'Build complete'",
+    "start": "vercel dev"
+  },
+  "keywords": ["ecommerce", "fashion", "accessories", "store"],
+  "author": "Lorena Store",
+  "license": "MIT",
+  "devDependencies": {
+    "vercel": "^32.0.0"
+  }
+}

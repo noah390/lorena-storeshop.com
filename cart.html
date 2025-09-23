@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <link rel="stylesheet" href="css/presidential.css">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
@@ -14,6 +15,7 @@
 
 </head>
 <body>
+    <script src="js/auth.js"></script>
         <!-- HEADER -->
     <div id="1"></div>
     <script>
@@ -29,11 +31,26 @@
 
         <!-- CART CONTAINER -->
     <div id="cartMainContainer">
-        <h1> Checkout </h1>
-        <h3 id="totalItem"> Total Items: 0 </h3>
+        <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
+            <i class="fas fa-shopping-cart" style="font-size: 2em; color: #e75480; margin-right: 15px;"></i>
+            <h1 style="margin: 0; color: #222;"> Shopping Cart </h1>
+        </div>
+        <h3 id="totalItem" style="text-align: center; color: #666;"> Total Items: 0 </h3>
 
         <div id="cartContainer">
             <!-- JS rendered code -->
+        </div>
+
+        <!-- Customer Details Form -->
+        <div id="customerForm" style="display: none; background: #f9f9f9; padding: 20px; border-radius: 10px; margin: 20px 0;">
+            <h3 style="color: #e75480; text-align: center;"><i class="fas fa-user"></i> Customer Details</h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <input type="text" id="customerName" placeholder="Full Name" required style="padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                <input type="email" id="customerEmail" placeholder="Email Address" required style="padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                <input type="tel" id="customerPhone" placeholder="Phone Number" required style="padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                <input type="text" id="customerCity" placeholder="City" required style="padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+            </div>
+            <textarea id="customerAddress" placeholder="Delivery Address" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; margin-top: 15px; height: 80px; resize: vertical;"></textarea>
         </div>
 
     </div>
@@ -51,5 +68,5 @@
             document.getElementById(4).innerHTML = req.responseText;
         }
     </script>
-<script src="/cart.js"></script>
+<script src="cart.js"></script>
 </html>

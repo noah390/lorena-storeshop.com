@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Lorena Store</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/4a3b1f73a2.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Roboto', sans-serif; background: linear-gradient(135deg, #e75480 0%, #ffb347 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+        .login-container { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
+        .logo { text-align: center; margin-bottom: 30px; }
+        .logo i { font-size: 3em; color: #e75480; margin-bottom: 10px; }
+        .logo h1 { color: #333; font-weight: 300; font-size: 2em; }
+        .form-group { margin-bottom: 20px; position: relative; }
+        .form-group input { width: 100%; padding: 15px 20px 15px 50px; border: 2px solid #eee; border-radius: 10px; font-size: 16px; transition: all 0.3s; }
+        .form-group input:focus { outline: none; border-color: #e75480; }
+        .form-group i { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); color: #999; }
+        .btn { width: 100%; padding: 15px; background: #e75480; color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: 500; cursor: pointer; transition: all 0.3s; }
+        .btn:hover { background: #d63384; transform: translateY(-2px); }
+        .error { color: #dc3545; text-align: center; margin: 10px 0; font-size: 14px; }
+        .success { color: #28a745; text-align: center; margin: 10px 0; font-size: 14px; }
+        .switch { text-align: center; margin-top: 20px; }
+        .switch a { color: #e75480; text-decoration: none; font-weight: 500; }
+        .switch a:hover { text-decoration: underline; }
+        .back-home { position: absolute; top: 20px; left: 20px; color: white; font-size: 24px; text-decoration: none; }
+        .back-home:hover { color: #f0f0f0; }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="back-home" title="Back to Home"><i class="fas fa-arrow-left"></i></a>
+    
+    <div class="login-container">
+        <div class="logo">
+            <i class="fas fa-gem"></i>
+            <h1>Lorena Store</h1>
+            <p style="color: #666; margin-top: 10px;">Welcome back!</p>
+        </div>
+        
+        <form id="loginForm">
+            <div class="form-group">
+                <i class="fas fa-user"></i>
+                <input type="text" id="identifier" placeholder="Email or Phone Number" required>
+            </div>
+            
+            <div class="form-group">
+                <i class="fas fa-lock"></i>
+                <input type="password" id="password" placeholder="Password" required>
+            </div>
+            
+            <div id="message" class="error" style="display: none;"></div>
+            
+            <button type="submit" class="btn">
+                <span id="btnText">Sign In</span>
+                <i id="btnLoader" class="fas fa-spinner fa-spin" style="display: none;"></i>
+            </button>
+        </form>
+        
+        <div class="switch">
+            Don't have an account? <a href="register.html">Sign Up</a>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const identifier = document.getElementById('identifier').value.trim();
+            const password = document.getElementById('password').value;
+            const messageEl = document.getElementById('message');
+            const btnText = document.getElementById('btnText');
+            const btnLoader = document.getElementById('btnLoader');
+            
+            if (!identifier || !password) {
+                showMessage('Please fill in all fields', 'error');
+                return;
+            }
+            
+            // Show loading
+            btnText.style.display = 'none';
+            btnLoader.style.display = 'inline';
+            
+            try {
+                // Try backend first
+                const response = await fetch('http://localhost:4000/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ identifier, password })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    localStorage.setItem('currentUser', JSON.stringify(data.user));
+                    showMessage('Login successful! Redirecting...', 'success');
+                    setTimeout(() => window.location.href = 'profile.html', 1000);
+                } else {
+                    showMessage(data.error || 'Login failed', 'error');
+                }
+            } catch (error) {
+                // Fallback to localStorage authentication
+                const users = JSON.parse(localStorage.getItem('registeredUsers') || '{}');
+                const user = users[identifier];
+                
+                if (user && user.password === password) {
+                    localStorage.setItem('currentUser', JSON.stringify({
+                        identifier: identifier,
+                        name: user.name,
+                        phone: user.phone || ''
+                    }));
+                    showMessage('Login successful! Redirecting...', 'success');
+                    setTimeout(() => window.location.href = 'profile.html', 1000);
+                } else {
+                    showMessage('Invalid credentials. Please try again.', 'error');
+                }
+            } finally {
+                btnText.style.display = 'inline';
+                btnLoader.style.display = 'none';
+            }
+        });
+        
+        function showMessage(text, type) {
+            const messageEl = document.getElementById('message');
+            messageEl.textContent = text;
+            messageEl.className = type;
+            messageEl.style.display = 'block';
+            setTimeout(() => messageEl.style.display = 'none', 5000);
+        }
+        
+        // Check if user is already logged in
+        if (localStorage.getItem('currentUser')) {
+            window.location.href = 'profile.html';
+        }
+    </script>
+</body>
+</html>

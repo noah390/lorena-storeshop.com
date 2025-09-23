@@ -21,7 +21,7 @@ body
     width: 100%;
     display: grid;
     grid-gap: 10px;
-    grid-template-columns: 1.5fr 1.5fr 5fr 1fr;
+    grid-template-columns: 1.5fr 2fr 4fr 1fr;
     font-family: 'Lato', sans-serif;
     z-index: 1;
     justify-content: space-between;
@@ -29,7 +29,11 @@ body
     padding: 15px 40px;
     box-sizing: border-box;
     position: fixed;
-    box-shadow: 0 1px 2px 0 rgba(60, 64, 67, 0.302), 0 2px 6px 2px rgba(60, 64, 67, 0.149); 
+    top: 0;
+    left: 0;
+    right: 0;
+    box-shadow: 0 1px 2px 0 rgba(60, 64, 67, 0.302), 0 2px 6px 2px rgba(60, 64, 67, 0.149);
+    z-index: 1000; 
 }
 #shopName 
 {
@@ -51,7 +55,8 @@ body
 {
     font-weight: bold;
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
 }
 #collection a
 {
@@ -303,4 +308,26 @@ body
         right: 62px;
         top: 18px;
     }
+}
+.addedToCart {
+    font-size: 2em;
+    margin-right: 25px;
+    color: #e75480;
+    transition: color 0.2s;
+    text-shadow: 0 1px 2px #fff, 0 0 2px #e75480;
+}
+.addedToCart:hover {
+    color: #222;
+}
+#user a {
+    color: #222 !important;
+    font-weight: bold;
+    font-size: 1.1em;
+    text-shadow: 0 1px 2px #fff, 0 0 2px #e75480;
+}
+#collection a {
+    text-decoration: none;
+    color: #222 !important;
+    font-weight: bold;
+    text-shadow: 0 1px 2px #fff, 0 0 2px #e75480;
 }

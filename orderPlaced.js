@@ -19,9 +19,10 @@ httpRequest.onreadystatechange = function()
             })
 
         // send with new request the updated JSON file to the server:
-        httpRequest.open("POST", jsonRequestURL, true)
-        httpRequest.setRequestHeader("Content-Type", "application/x-www-form-urlencoded")
-        httpRequest.send(jsonArray)
+        let postRequest = new XMLHttpRequest()
+        postRequest.open("POST", jsonRequestURL, true)
+        postRequest.setRequestHeader("Content-Type", "application/json")
+        postRequest.send(JSON.stringify(jsonArray[jsonArray.length-1]))
     }
 }
 httpRequest.send(null);

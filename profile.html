@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - Lorena Store</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Roboto', sans-serif; background: linear-gradient(135deg, #e75480 0%, #ffb347 100%); min-height: 100vh; }
+        .header { background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); padding: 1rem 2rem; box-shadow: 0 2px 20px rgba(0,0,0,0.1); }
+        .nav { display: flex; justify-content: space-between; align-items: center; max-width: 1200px; margin: 0 auto; }
+        .logo { font-size: 1.8rem; font-weight: 700; color: #e75480; text-decoration: none; display: flex; align-items: center; gap: 0.5rem; }
+        .nav-links { display: flex; gap: 2rem; align-items: center; }
+        .nav-links a { text-decoration: none; color: #333; font-weight: 500; transition: color 0.3s; }
+        .nav-links a:hover { color: #e75480; }
+        .cart-icon { position: relative; }
+        .cart-badge { position: absolute; top: -8px; right: -8px; background: #e75480; color: white; border-radius: 50%; width: 20px; height: 20px; font-size: 12px; display: flex; align-items: center; justify-content: center; }
+        .container { max-width: 1000px; margin: 2rem auto; padding: 0 1rem; }
+        .profile-card { background: white; border-radius: 20px; padding: 2rem; box-shadow: 0 20px 40px rgba(0,0,0,0.1); margin-bottom: 2rem; }
+        .welcome-section { text-align: center; margin-bottom: 3rem; }
+        .welcome-section h1 { color: #333; font-size: 2.5rem; margin-bottom: 1rem; }
+        .welcome-section p { color: #666; font-size: 1.1rem; line-height: 1.6; }
+        .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin: 2rem 0; }
+        .feature-card { background: #f8f9fa; padding: 1.5rem; border-radius: 15px; text-align: center; transition: transform 0.3s; }
+        .feature-card:hover { transform: translateY(-5px); }
+        .feature-card i { font-size: 2.5rem; color: #e75480; margin-bottom: 1rem; }
+        .feature-card h3 { color: #333; margin-bottom: 0.5rem; }
+        .feature-card p { color: #666; font-size: 0.9rem; }
+        .auth-section { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 2rem; }
+        .auth-card { background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .auth-card h2 { color: #333; margin-bottom: 1rem; text-align: center; }
+        .auth-card p { color: #666; text-align: center; margin-bottom: 1.5rem; }
+        .btn { display: block; width: 100%; padding: 12px; background: #e75480; color: white; text-decoration: none; text-align: center; border-radius: 10px; font-weight: 500; transition: all 0.3s; border: none; cursor: pointer; }
+        .btn:hover { background: #d63384; transform: translateY(-2px); }
+        .btn-outline { background: transparent; border: 2px solid #e75480; color: #e75480; }
+        .btn-outline:hover { background: #e75480; color: white; }
+        .user-profile { display: none; }
+        .profile-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem; }
+        .profile-avatar { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 3px solid #e75480; }
+        .profile-info h2 { color: #333; margin-bottom: 0.5rem; }
+        .profile-info p { color: #666; }
+        .profile-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin: 2rem 0; }
+        .stat-card { background: #f8f9fa; padding: 1.5rem; border-radius: 10px; text-align: center; }
+        .stat-card h3 { color: #e75480; font-size: 2rem; margin-bottom: 0.5rem; }
+        .stat-card p { color: #666; }
+        .action-buttons { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 2rem; }
+        @media (max-width: 768px) {
+            .nav { flex-direction: column; gap: 1rem; }
+            .nav-links { flex-wrap: wrap; justify-content: center; }
+            .auth-section { grid-template-columns: 1fr; }
+            .welcome-section h1 { font-size: 2rem; }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <nav class="nav">
+            <a href="index.html" class="logo">
+                <i class="fas fa-gem"></i>
+                Lorena Store
+            </a>
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="clothing.html">Clothing</a>
+                <a href="accessories.html">Accessories</a>
+                <a href="contact.html">Contact</a>
+                <a href="cart.html" class="cart-icon">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span class="cart-badge" id="cartBadge">0</span>
+                </a>
+                <a href="#" id="profileLink">
+                    <i class="fas fa-user-circle"></i>
+                </a>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container">
+        <!-- Guest View -->
+        <div id="guestView" class="profile-card">
+            <div class="welcome-section">
+                <h1>Welcome to Lorena Store</h1>
+                <p>Your premier destination for fashion and accessories. Discover our curated collection of high-quality products that combine style, comfort, and affordability.</p>
+            </div>
+
+            <div class="features-grid">
+                <div class="feature-card">
+                    <i class="fas fa-shipping-fast"></i>
+                    <h3>Fast Delivery</h3>
+                    <p>Quick and reliable shipping nationwide with tracking</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-medal"></i>
+                    <h3>Quality Products</h3>
+                    <p>Premium materials and exceptional craftsmanship</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-headset"></i>
+                    <h3>24/7 Support</h3>
+                    <p>Always here to help with your shopping needs</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-shield-alt"></i>
+                    <h3>Secure Shopping</h3>
+                    <p>Safe and secure payment processing</p>
+                </div>
+            </div>
+
+            <div class="auth-section">
+                <div class="auth-card">
+                    <h2>New Customer?</h2>
+                    <p>Join thousands of satisfied customers and start your fashion journey with us today.</p>
+                    <a href="register.html" class="btn">Create Account</a>
+                </div>
+                <div class="auth-card">
+                    <h2>Returning Customer?</h2>
+                    <p>Welcome back! Sign in to access your account and continue shopping.</p>
+                    <a href="login.html" class="btn btn-outline">Sign In</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- User Profile View -->
+        <div id="userProfile" class="user-profile">
+            <div class="profile-card">
+                <div class="profile-header">
+                    <img id="userAvatar" src="" alt="Profile" class="profile-avatar">
+                    <div class="profile-info">
+                        <h2 id="userName">Welcome back!</h2>
+                        <p id="userEmail">Manage your account and orders</p>
+                    </div>
+                </div>
+
+                <div class="profile-stats">
+                    <div class="stat-card">
+                        <h3 id="cartCount">0</h3>
+                        <p>Items in Cart</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="orderCount">0</h3>
+                        <p>Total Orders</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Premium</h3>
+                        <p>Member Status</p>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <a href="index.html" class="btn">Continue Shopping</a>
+                    <a href="cart.html" class="btn btn-outline">View Cart</a>
+                    <button onclick="logout()" class="btn" style="background: #dc3545;">Logout</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Update cart badge
+        function updateCartBadge() {
+            const cart = JSON.parse(localStorage.getItem('cart') || '{}');
+            const totalItems = Object.values(cart).reduce((a, b) => a + b, 0);
+            document.getElementById('cartBadge').textContent = totalItems;
+            if (document.getElementById('cartCount')) {
+                document.getElementById('cartCount').textContent = totalItems;
+            }
+        }
+
+        // Check authentication status
+        function checkAuth() {
+            const currentUser = localStorage.getItem('currentUser');
+            const guestView = document.getElementById('guestView');
+            const userProfile = document.getElementById('userProfile');
+            const profileLink = document.getElementById('profileLink');
+
+            if (currentUser) {
+                try {
+                    const user = JSON.parse(currentUser);
+                    guestView.style.display = 'none';
+                    userProfile.style.display = 'block';
+                    
+                    // Update user info
+                    document.getElementById('userName').textContent = `Welcome back, ${user.name || user.identifier}!`;
+                    document.getElementById('userEmail').textContent = user.identifier;
+                    document.getElementById('userAvatar').src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || user.identifier)}&background=e75480&color=fff`;
+                    
+                    // Update order count
+                    const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+                    document.getElementById('orderCount').textContent = orders.length;
+                    
+                    profileLink.onclick = (e) => {
+                        e.preventDefault();
+                        document.getElementById('userProfile').scrollIntoView({ behavior: 'smooth' });
+                    };
+                } catch (e) {
+                    localStorage.removeItem('currentUser');
+                    showGuestView();
+                }
+            } else {
+                showGuestView();
+            }
+        }
+
+        function showGuestView() {
+            document.getElementById('guestView').style.display = 'block';
+            document.getElementById('userProfile').style.display = 'none';
+            document.getElementById('profileLink').onclick = (e) => {
+                e.preventDefault();
+                window.location.href = 'login.html';
+            };
+        }
+
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.removeItem('currentUser');
+                window.location.reload();
+            }
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            updateCartBadge();
+            checkAuth();
+        });
+    </script>
+</body>
+</html>

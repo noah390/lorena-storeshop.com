@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Lorena Store</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/4a3b1f73a2.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Roboto', sans-serif; background: linear-gradient(135deg, #e75480 0%, #ffb347 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        .register-container { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); width: 100%; max-width: 450px; }
+        .logo { text-align: center; margin-bottom: 30px; }
+        .logo i { font-size: 3em; color: #e75480; margin-bottom: 10px; }
+        .logo h1 { color: #333; font-weight: 300; font-size: 2em; }
+        .form-group { margin-bottom: 20px; position: relative; }
+        .form-group input { width: 100%; padding: 15px 20px 15px 50px; border: 2px solid #eee; border-radius: 10px; font-size: 16px; transition: all 0.3s; }
+        .form-group input:focus { outline: none; border-color: #e75480; }
+        .form-group i { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); color: #999; }
+        .btn { width: 100%; padding: 15px; background: #e75480; color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: 500; cursor: pointer; transition: all 0.3s; }
+        .btn:hover { background: #d63384; transform: translateY(-2px); }
+        .error { color: #dc3545; text-align: center; margin: 10px 0; font-size: 14px; }
+        .success { color: #28a745; text-align: center; margin: 10px 0; font-size: 14px; }
+        .switch { text-align: center; margin-top: 20px; }
+        .switch a { color: #e75480; text-decoration: none; font-weight: 500; }
+        .switch a:hover { text-decoration: underline; }
+        .back-home { position: absolute; top: 20px; left: 20px; color: white; font-size: 24px; text-decoration: none; }
+        .back-home:hover { color: #f0f0f0; }
+        .auth-toggle { display: flex; margin-bottom: 20px; border-radius: 10px; overflow: hidden; border: 2px solid #eee; }
+        .auth-toggle button { flex: 1; padding: 12px; border: none; background: #f8f9fa; cursor: pointer; transition: all 0.3s; }
+        .auth-toggle button.active { background: #e75480; color: white; }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="back-home" title="Back to Home"><i class="fas fa-arrow-left"></i></a>
+    
+    <div class="register-container">
+        <div class="logo">
+            <i class="fas fa-gem"></i>
+            <h1>Lorena Store</h1>
+            <p style="color: #666; margin-top: 10px;">Create your account</p>
+        </div>
+        
+        <div class="auth-toggle">
+            <button type="button" id="emailTab" class="active" onclick="switchAuthType('email')">
+                <i class="fas fa-envelope"></i> Email
+            </button>
+            <button type="button" id="phoneTab" onclick="switchAuthType('phone')">
+                <i class="fas fa-phone"></i> Phone
+            </button>
+        </div>
+        
+        <form id="registerForm">
+            <div class="form-group">
+                <i class="fas fa-user"></i>
+                <input type="text" id="name" placeholder="Full Name" required>
+            </div>
+            
+            <div class="form-group" id="emailGroup">
+                <i class="fas fa-envelope"></i>
+                <input type="email" id="email" placeholder="Email Address" required>
+            </div>
+            
+            <div class="form-group" id="phoneGroup" style="display: none;">
+                <i class="fas fa-phone"></i>
+                <input type="tel" id="phone" placeholder="Phone Number (e.g., 08012345678)">
+            </div>
+            
+            <div class="form-group">
+                <i class="fas fa-lock"></i>
+                <input type="password" id="password" placeholder="Password (min 6 characters)" required minlength="6">
+            </div>
+            
+            <div class="form-group">
+                <i class="fas fa-lock"></i>
+                <input type="password" id="confirmPassword" placeholder="Confirm Password" required>
+            </div>
+            
+            <div id="message" class="error" style="display: none;"></div>
+            
+            <button type="submit" class="btn">
+                <span id="btnText">Create Account</span>
+                <i id="btnLoader" class="fas fa-spinner fa-spin" style="display: none;"></i>
+            </button>
+        </form>
+        
+        <div class="switch">
+            Already have an account? <a href="login.html">Sign In</a>
+        </div>
+    </div>
+
+    <script>
+        let authType = 'email';
+        
+        function switchAuthType(type) {
+            authType = type;
+            const emailTab = document.getElementById('emailTab');
+            const phoneTab = document.getElementById('phoneTab');
+            const emailGroup = document.getElementById('emailGroup');
+            const phoneGroup = document.getElementById('phoneGroup');
+            const emailInput = document.getElementById('email');
+            const phoneInput = document.getElementById('phone');
+            
+            if (type === 'email') {
+                emailTab.classList.add('active');
+                phoneTab.classList.remove('active');
+                emailGroup.style.display = 'block';
+                phoneGroup.style.display = 'none';
+                emailInput.required = true;
+                phoneInput.required = false;
+            } else {
+                phoneTab.classList.add('active');
+                emailTab.classList.remove('active');
+                phoneGroup.style.display = 'block';
+                emailGroup.style.display = 'none';
+                phoneInput.required = true;
+                emailInput.required = false;
+            }
+        }
+        
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const name = document.getElementById('name').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const messageEl = document.getElementById('message');
+            const btnText = document.getElementById('btnText');
+            const btnLoader = document.getElementById('btnLoader');
+            
+            // Validation
+            if (!name || !password || !confirmPassword) {
+                showMessage('Please fill in all required fields', 'error');
+                return;
+            }
+            
+            if (authType === 'email' && !email) {
+                showMessage('Please enter your email address', 'error');
+                return;
+            }
+            
+            if (authType === 'phone' && !phone) {
+                showMessage('Please enter your phone number', 'error');
+                return;
+            }
+            
+            if (password !== confirmPassword) {
+                showMessage('Passwords do not match', 'error');
+                return;
+            }
+            
+            if (password.length < 6) {
+                showMessage('Password must be at least 6 characters', 'error');
+                return;
+            }
+            
+            // Phone validation
+            if (authType === 'phone' && !/^[0-9]{11}$/.test(phone)) {
+                showMessage('Please enter a valid 11-digit phone number', 'error');
+                return;
+            }
+            
+            // Show loading
+            btnText.style.display = 'none';
+            btnLoader.style.display = 'inline';
+            
+            const identifier = authType === 'email' ? email : phone;
+            
+            try {
+                // Try backend first
+                const response = await fetch('http://localhost:4000/api/auth/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        identifier, 
+                        password, 
+                        name,
+                        phone: authType === 'phone' ? phone : ''
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    localStorage.setItem('currentUser', JSON.stringify(data.user));
+                    showMessage('Account created successfully! Redirecting...', 'success');
+                    setTimeout(() => window.location.href = 'profile.html', 1000);
+                } else {
+                    showMessage(data.error || 'Registration failed', 'error');
+                }
+            } catch (error) {
+                // Fallback to localStorage registration
+                const users = JSON.parse(localStorage.getItem('registeredUsers') || '{}');
+                
+                if (users[identifier]) {
+                    showMessage('User already exists. Please login instead.', 'error');
+                    return;
+                }
+                
+                // Save user to localStorage
+                users[identifier] = {
+                    name: name,
+                    password: password,
+                    phone: authType === 'phone' ? phone : '',
+                    email: authType === 'email' ? email : '',
+                    createdAt: new Date().toISOString()
+                };
+                
+                localStorage.setItem('registeredUsers', JSON.stringify(users));
+                localStorage.setItem('currentUser', JSON.stringify({
+                    identifier: identifier,
+                    name: name,
+                    phone: authType === 'phone' ? phone : ''
+                }));
+                
+                showMessage('Account created successfully! Redirecting...', 'success');
+                setTimeout(() => window.location.href = 'profile.html', 1000);
+            } finally {
+                btnText.style.display = 'inline';
+                btnLoader.style.display = 'none';
+            }
+        });
+        
+        function showMessage(text, type) {
+            const messageEl = document.getElementById('message');
+            messageEl.textContent = text;
+            messageEl.className = type;
+            messageEl.style.display = 'block';
+            setTimeout(() => messageEl.style.display = 'none', 5000);
+        }
+        
+        // Check if user is already logged in
+        if (localStorage.getItem('currentUser')) {
+            window.location.href = 'profile.html';
+        }
+    </script>
+</body>
+</html>

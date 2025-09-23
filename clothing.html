@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clothing | Lorena Store</title>
+    <link rel="stylesheet" href="css/content.css">
+</head>
+<body>
+    <script src="js/auth.js"></script>
+    <div id="mainContainer">
+        <h1>Clothing for Men and Women</h1>
+        <div id="containerClothing"></div>
+    </div>
+    <script src="content.js"></script>
+    <script>
+        // Only show clothing products
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof renderClothing === 'function') {
+                renderClothing();
+            }
+        });
+    </script>
+</body>
+</html>

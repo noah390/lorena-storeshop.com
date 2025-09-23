@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <link rel="stylesheet" href="css/presidential.css">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
@@ -27,13 +28,25 @@
         }
     </script>
 
-    <!-- OREDER PLACED -->
+    <!-- ORDER PLACED -->
     <div id="orderContainer">
         <div id="check"><i class="fas fa-check-circle"></i></div>
         
         <div id="aboutCheck">
-            <h1> Order Placed Successfully! </h1>
-            <p> We've sent you an email with the Order details. </p>
+            <h1> 🎉 Order Placed Successfully! </h1>
+            <p> Thank you for your patronage! We appreciate your business. </p>
+            <div id="orderDetails" style="background: #f9f9f9; padding: 20px; border-radius: 10px; margin: 20px 0; text-align: left;">
+                <!-- Order details will be loaded here -->
+            </div>
+            <p style="color: #666; font-style: italic;"> We will contact you shortly for delivery confirmation. </p>
+            <div style="margin-top: 20px;">
+                <a href="index.html" style="background: #e75480; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block; margin-right: 10px;">
+                    <i class="fas fa-home"></i> Continue Shopping
+                </a>
+                <a href="profile.html" style="background: #6c757d; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;">
+                    <i class="fas fa-user"></i> View Profile
+                </a>
+            </div>
         </div>
     </div>
         <!-- FOOTER -->
@@ -49,5 +62,35 @@
             }
         </script>
 </body>
-<script src="/orderPlaced.js"></script>
+<script>
+// Display order details
+const lastOrder = JSON.parse(localStorage.getItem('lastOrder') || '{}');
+if(lastOrder && lastOrder.orderNumber) {
+    const orderDetailsDiv = document.getElementById('orderDetails');
+    let itemsList = '';
+    
+    if(lastOrder.items && Array.isArray(lastOrder.items)) {
+        itemsList = lastOrder.items.map(item => 
+            `<div style="display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #eee;">
+                <span>${item.name} × ${item.quantity}</span>
+                <span>₦${item.total.toLocaleString()}</span>
+            </div>`
+        ).join('');
+    }
+    
+    orderDetailsDiv.innerHTML = `
+        <h3 style="color: #e75480; margin-bottom: 15px;"><i class="fas fa-receipt"></i> Order Summary</h3>
+        <p><strong>Order Number:</strong> ${lastOrder.orderNumber}</p>
+        <p><strong>Customer:</strong> ${lastOrder.customer ? lastOrder.customer.name : 'N/A'}</p>
+        <p><strong>Date:</strong> ${new Date(lastOrder.orderDate).toLocaleString()}</p>
+        <div style="margin: 15px 0;">
+            <h4>Items Ordered:</h4>
+            ${itemsList}
+        </div>
+        <div style="text-align: right; font-size: 1.2em; font-weight: bold; color: #e75480; margin-top: 15px; padding-top: 15px; border-top: 2px solid #e75480;">
+            Total: ₦${lastOrder.totalAmount ? lastOrder.totalAmount.toLocaleString() : 'N/A'}
+        </div>
+    `;
+}
+</script>
 </html>

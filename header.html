@@ -4,11 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title> HEADER | E-COMMERCE WEBSITE </title>
+    <title> HEADER | LORENA</title>
     <!-- favicon -->
     <link rel="icon" href="https://yt3.ggpht.com/a/AGF-l78km1YyNXmF0r3-0CycCA0HLA_i6zYn_8NZEg=s900-c-k-c0xffffffff-no-rj-mo" type="image/gif" sizes="16x16">
     <!-- EXTERNAL LINKS -->
     <link rel="stylesheet" href="css/header.css">
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
     <script src="https://kit.fontawesome.com/4a3b1f73a2.js"></script>
     <link href="https://fonts.googleapis.com/css?family=Lato&display=swap" rel="stylesheet">
 </head>
@@ -19,11 +20,18 @@
             <!-- MAIN CONTAINER -->
             <div id="container">
                 <!-- SHOP NAME -->
-                <div id="shopName"><a href="index.html"> <b>SHOP</b>LANE </a></div>
-                    <!-- COLLCETIONS ON WEBSITE -->
+                <div id="shopName" style="font-family: 'Pacifico', cursive; font-size: 2.2em; color: #e75480; letter-spacing: 2px; display: flex; align-items: center;">
+                    <a href="index.html" style="text-decoration: none; color: inherit; display: flex; align-items: center;">
+                        <span style="margin-right: 10px;"><i class="fas fa-gem"></i></span>
+                        Lorena <span style="color:#222; margin-left:5px;">Store</span>
+                    </a>
+                </div>
+                    <!-- COLLECTIONS ON WEBSITE -->
                     <div id="collection">
-                        <div id="clothing"><a href="clothing.html"> CLOTHING </a></div>
-                        <div id="accessories"><a href="accessories.html"> ACCESSORIES </a></div>
+                        <div><a href="index.html"> HOME </a></div>
+                        <div><a href="clothing.html"> CLOTHING </a></div>
+                        <div><a href="accessories.html"> ACCESSORIES </a></div>
+                        <div><a href="contact.html"> CONTACT </a></div>
                     </div>
                     <!-- SEARCH SECTION -->
                     <div id="search">
@@ -32,9 +40,29 @@
                     </div>
                     <!-- USER SECTION (CART AND USER ICON) -->
                     <div id="user">
-                        <a href="cart.html"> <i class="fas fa-shopping-cart addedToCart"><div id="badge"> 0 </div></i></a>
-                        <a href="#"> <i class="fas fa-user-circle userIcon"></i> </a>
+                        <a href="cart.html" title="Shopping Cart"> <i class="fas fa-shopping-cart addedToCart"><div id="badge"> 0 </div></i></a>
+                        <a href="profile.html" title="User Profile" id="userProfileLink"> <i class="fas fa-user-circle userIcon"></i> </a>
                     </div>
+                    <script>
+                        // Update cart badge and user link
+                        document.addEventListener('DOMContentLoaded', function() {
+                            // Update cart badge
+                            const cart = JSON.parse(localStorage.getItem('cart') || '{}');
+                            const totalItems = Object.values(cart).reduce((a, b) => a + b, 0);
+                            const badge = document.getElementById('badge');
+                            if (badge) badge.textContent = totalItems;
+                            
+                            // Update user profile link
+                            const currentUser = localStorage.getItem('currentUser');
+                            const userLink = document.getElementById('userProfileLink');
+                            if (currentUser) {
+                                userLink.title = 'My Profile';
+                                userLink.style.color = '#e75480';
+                            } else {
+                                userLink.title = 'Login / Register';
+                            }
+                        });
+                    </script>
             </div>
 
         </section>

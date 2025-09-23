@@ -3,10 +3,11 @@ console.clear()
 let id = location.search.split('?')[1]
 console.log(id)
 
-if(document.cookie.indexOf(',counter=')>=0)
-{
-    let counter = document.cookie.split(',')[1].split('=')[1]
-    document.getElementById("badge").innerHTML = counter
+// Update cart badge from localStorage
+let cart = JSON.parse(localStorage.getItem('cart') || '{}');
+let totalItems = Object.values(cart).reduce((a, b) => a + b, 0);
+if(document.getElementById("badge")) {
+    document.getElementById("badge").innerHTML = totalItems;
 }
 
 function dynamicContentDetails(ob)
@@ -43,7 +44,7 @@ function dynamicContentDetails(ob)
     detailsDiv.id = 'details'
 
     let h3DetailsDiv = document.createElement('h3')
-    let h3DetailsText = document.createTextNode('Rs ' + ob.price)
+    let h3DetailsText = document.createTextNode('₦ ' + ob.price)
     h3DetailsDiv.appendChild(h3DetailsText)
 
     let h3 = document.createElement('h3')
@@ -84,24 +85,45 @@ function dynamicContentDetails(ob)
     let buttonTag = document.createElement('button')
     buttonDiv.appendChild(buttonTag)
 
-    buttonText = document.createTextNode('Add to Cart')
-    buttonTag.onclick  =   function()
+    let buttonText = document.createTextNode('Add to Cart')
+    buttonTag.style.cssText = 'background: #e75480; color: white; border: none; padding: 12px 24px; border-radius: 5px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s;'
+    buttonTag.onmouseover = function() { this.style.background = '#d63384'; this.style.transform = 'translateY(-2px)'; }
+    buttonTag.onmouseout = function() { this.style.background = '#e75480'; this.style.transform = 'translateY(0)'; }
+    
+    buttonTag.onclick = function()
     {
-        let order = id+" "
-        let counter = 1
-        if(document.cookie.indexOf(',counter=')>=0)
-        {
-            order = id + " " + document.cookie.split(',')[0].split('=')[1]
-            counter = Number(document.cookie.split(',')[1].split('=')[1]) + 1
+        // Get current cart from localStorage
+        let cart = JSON.parse(localStorage.getItem('cart') || '{}');
+        
+        // Add or increment item
+        if(cart[id]) {
+            cart[id] += 1;
+        } else {
+            cart[id] = 1;
         }
-        document.cookie = "orderId=" + order + ",counter=" + counter
-        document.getElementById("badge").innerHTML = counter
-        console.log(document.cookie)
+        
+        // Save back to localStorage
+        localStorage.setItem('cart', JSON.stringify(cart));
+        
+        // Update badge
+        let totalItems = Object.values(cart).reduce((a, b) => a + b, 0);
+        document.getElementById("badge").innerHTML = totalItems;
+        
+        // Show feedback
+        const originalText = buttonText.textContent;
+        buttonText.textContent = 'Added!';
+        buttonTag.style.background = '#28a745';
+        
+        setTimeout(() => {
+            buttonText.textContent = originalText;
+            buttonTag.style.background = '#e75480';
+        }, 1000);
+        
+        console.log('Added to cart:', cart);
     }
     buttonTag.appendChild(buttonText)
 
 
-    console.log(mainContainer.appendChild(imageSectionDiv));
     mainContainer.appendChild(imageSectionDiv)
     mainContainer.appendChild(productDetailsDiv)
     productDetailsDiv.appendChild(h1)
@@ -143,5 +165,5 @@ let httpRequest = new XMLHttpRequest()
     }
 }
 
-httpRequest.open('GET', 'https://5d76bf96515d1a0014085cf9.mockapi.io/product/'+id, true)
+httpRequest.open('GET', 'http://localhost:4000/api/products/'+id, true)
 httpRequest.send()  
