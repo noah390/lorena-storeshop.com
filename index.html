@@ -229,63 +229,12 @@
                 <textarea id="customer-address" placeholder="Delivery Address (Optional)"></textarea>
                 <div class="form-buttons">
                     <button type="button" onclick="closeCheckoutModal()">Cancel</button>
-                    <button type="submit" id="submit-order">Complete Order</button>
+                    <button type="submit">Complete Order</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Overlay -->
-    <div class="overlay" onclick="toggleCart()"></div>
-
-    <script>
-        // Initialize cart display on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            updateCartDisplay();
-        });
-    </script>
-</body>
-</html>ton" onclick="closeCheckoutModal()">Cancel</button>
-                    <button type="submit" id="submit-order">Complete Order</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Overlay -->
-    <div class="overlay" onclick="toggleCart()"></div>
-
-    <script>
-        // Initialize cart display on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            updateCartDisplay();
-        });
-    </script>
-</body>
-</html>ton>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Formspree Fallback Form -->
-    <form id="formspree-form" action="https://formspree.io/f/your-form-id" method="POST" style="display: none;">
-        <input type="hidden" name="_subject" value="New Order from Lorena Store">
-        <input type="hidden" name="_next" value="https://yourusername.github.io/your-repo/thank-you.html">
-        <input type="hidden" name="customer-name" id="form-name">
-        <input type="hidden" name="customer-phone" id="form-phone">
-        <input type="hidden" name="customer-email" id="form-email">
-        <input type="hidden" name="customer-address" id="form-address">
-        <input type="hidden" name="order-details" id="form-order-details">
-    </form>
-
-    <div id="overlay" class="overlay" onclick="toggleCart()"></div>
-
-    <!-- Firebase Scripts -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-    <script src="js/firebase-products.js"></script>
-    
     <script>
         function loadContent(url, elementId) {
             const req = new XMLHttpRequest();
