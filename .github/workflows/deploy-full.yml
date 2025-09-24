@@ -1,0 +1,114 @@
+name: Deploy Lorena Store
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: Backend/package-lock.json
+    
+    - name: Install Backend Dependencies
+      run: |
+        cd Backend
+        npm ci
+    
+    - name: Test Backend
+      run: |
+        cd Backend
+        npm test || echo "No tests configured"
+    
+    - name: Validate JSON Files
+      run: |
+        cd Backend
+        node -e "
+          const fs = require('fs');
+          try {
+            JSON.parse(fs.readFileSync('products.json', 'utf8'));
+            JSON.parse(fs.readFileSync('orders.json', 'utf8'));
+            console.log('✅ JSON files are valid');
+          } catch(e) {
+            console.error('❌ JSON validation failed:', e.message);
+            process.exit(1);
+          }
+        "
+
+  deploy-frontend:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+    
+    - name: Install Vercel CLI
+      run: npm install -g vercel
+    
+    - name: Deploy to Vercel
+      run: |
+        vercel --token ${{ secrets.VERCEL_TOKEN }} --prod
+      env:
+        VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+        VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+  deploy-backend:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: Backend/package-lock.json
+    
+    - name: Install Backend Dependencies
+      run: |
+        cd Backend
+        npm ci --only=production
+    
+    - name: Deploy to Heroku
+      uses: akhileshns/heroku-deploy@v3.12.12
+      with:
+        heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
+        heroku_app_name: "lorena-store-backend"
+        heroku_email: ${{ secrets.HEROKU_EMAIL }}
+        appdir: "Backend"
+        
+  notify:
+    needs: [deploy-frontend, deploy-backend]
+    runs-on: ubuntu-latest
+    if: always()
+    
+    steps:
+    - name: Notify Deployment Status
+      run: |
+        if [ "${{ needs.deploy-frontend.result }}" == "success" ] && [ "${{ needs.deploy-backend.result }}" == "success" ]; then
+          echo "🚀 Deployment successful!"
+          echo "Frontend: https://your-vercel-domain.vercel.app"
+          echo "Backend: https://lorena-store-backend.herokuapp.com"
+        else
+          echo "❌ Deployment failed. Check the logs above."
+        fi

@@ -1,0 +1,173 @@
+/* Mobile Utility Styles for Enhanced Responsiveness */
+
+/* Form Responsiveness */
+input, textarea, select, button {
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+/* Touch-friendly buttons */
+button, .btn, input[type="submit"], input[type="button"] {
+    min-height: 44px;
+    padding: 12px 20px;
+    font-size: 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+/* Responsive images */
+img {
+    max-width: 100%;
+    height: auto;
+}
+
+/* Responsive tables */
+table {
+    width: 100%;
+    overflow-x: auto;
+    display: block;
+    white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+    table {
+        font-size: 14px;
+    }
+    
+    th, td {
+        padding: 8px 4px;
+    }
+}
+
+/* Form improvements for mobile */
+@media (max-width: 768px) {
+    input[type="text"], 
+    input[type="email"], 
+    input[type="password"], 
+    input[type="tel"], 
+    textarea {
+        width: 100%;
+        padding: 15px;
+        font-size: 16px; /* Prevents zoom on iOS */
+        border-radius: 8px;
+        border: 2px solid #ddd;
+        margin-bottom: 15px;
+    }
+    
+    input:focus, textarea:focus {
+        border-color: #e75480;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(231, 84, 128, 0.1);
+    }
+    
+    label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: bold;
+        color: #333;
+    }
+}
+
+/* Loading states */
+.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+/* Accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    button, .btn {
+        border: 2px solid currentColor;
+    }
+    
+    a {
+        text-decoration: underline;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    body {
+        background-color: #1a1a1a;
+        color: #ffffff;
+    }
+    
+    #container {
+        background-color: #2d2d2d;
+        color: #ffffff;
+    }
+    
+    #mobileMenu {
+        background-color: #2d2d2d;
+        color: #ffffff;
+    }
+    
+    .mobile-menu-item:hover {
+        background-color: #3d3d3d;
+    }
+}
+
+/* Responsive spacing utilities */
+.p-mobile {
+    padding: 15px;
+}
+
+.m-mobile {
+    margin: 15px;
+}
+
+@media (max-width: 768px) {
+    .hide-mobile {
+        display: none !important;
+    }
+    
+    .show-mobile {
+        display: block !important;
+    }
+    
+    .text-center-mobile {
+        text-align: center !important;
+    }
+    
+    .full-width-mobile {
+        width: 100% !important;
+    }
+}
+
+/* Smooth scrolling */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Focus indicators for keyboard navigation */
+a:focus, button:focus, input:focus, textarea:focus, select:focus {
+    outline: 2px solid #e75480;
+    outline-offset: 2px;
+}
+
+/* Skip link for accessibility */
+.skip-link {
+    position: absolute;
+    top: -40px;
+    left: 6px;
+    background: #e75480;
+    color: white;
+    padding: 8px;
+    text-decoration: none;
+    border-radius: 4px;
+    z-index: 1000;
+}
+
+.skip-link:focus {
+    top: 6px;
+}

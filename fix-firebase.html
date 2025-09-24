@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fix Firebase Permissions</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f4f6fb; margin: 0; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+        h2 { color: #e75480; }
+        .step { background: #f8f9fa; padding: 20px; margin: 15px 0; border-radius: 8px; border-left: 4px solid #e75480; }
+        code { background: #f1f1f1; padding: 2px 6px; border-radius: 3px; font-family: monospace; }
+        .warning { background: #fff3cd; border: 1px solid #ffeaa7; color: #856404; padding: 15px; border-radius: 5px; margin: 15px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>🔧 Fix Firebase Permission Denied Error</h2>
+        
+        <div class="warning">
+            <strong>⚠️ Permission Denied Error</strong><br>
+            Your Firebase Realtime Database has restricted access. Follow these steps to fix it:
+        </div>
+
+        <div class="step">
+            <h3>Step 1: Go to Firebase Console</h3>
+            <p>1. Open <a href="https://console.firebase.google.com" target="_blank">Firebase Console</a></p>
+            <p>2. Select your project: <strong>lorena-store-9124a</strong></p>
+        </div>
+
+        <div class="step">
+            <h3>Step 2: Update Database Rules</h3>
+            <p>1. Click <strong>"Realtime Database"</strong> in the left menu</p>
+            <p>2. Click the <strong>"Rules"</strong> tab</p>
+            <p>3. Replace the rules with:</p>
+            <pre><code>{
+  "rules": {
+    ".read": true,
+    ".write": true
+  }
+}</code></pre>
+            <p>4. Click <strong>"Publish"</strong></p>
+        </div>
+
+        <div class="step">
+            <h3>Step 3: Test the Fix</h3>
+            <p>1. Go back to <a href="populate-products.html">populate-products.html</a></p>
+            <p>2. Click "🚀 Populate Firebase Database"</p>
+            <p>3. Should work without permission errors!</p>
+        </div>
+
+        <div class="step">
+            <h3>Alternative: Use Test Data</h3>
+            <p>If Firebase still doesn't work, your site will use local test data automatically.</p>
+            <button onclick="createTestData()" style="background: #e75480; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
+                Create Local Test Data
+            </button>
+        </div>
+
+        <p style="text-align: center; margin-top: 30px;">
+            <a href="admin-login.html" style="color: #e75480;">← Back to Admin</a> |
+            <a href="index.html" style="color: #e75480;">Home</a>
+        </p>
+    </div>
+
+    <script>
+        function createTestData() {
+            const testProducts = [
+                { id: '1', name: 'Summer Dress', price: 15000, image: 'https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=400', category: 'clothing', isAccessory: false },
+                { id: '2', name: 'Designer Handbag', price: 25000, image: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=400', category: 'accessories', isAccessory: true },
+                { id: '3', name: 'Classic Shirt', price: 8000, image: 'https://images.unsplash.com/photo-1621072156002-e2fccdc0b176?w=400', category: 'clothing', isAccessory: false },
+                { id: '4', name: 'Gold Necklace', price: 12000, image: 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400', category: 'jewelry', isAccessory: true }
+            ];
+            
+            localStorage.setItem('testProducts', JSON.stringify(testProducts));
+            alert('✅ Test data created! Your site will now show sample products.');
+        }
+    </script>
+</body>
+</html>

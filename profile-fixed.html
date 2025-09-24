@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - Lorena Store</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/4a3b1f73a2.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Roboto', sans-serif; background: linear-gradient(135deg, #e75480 0%, #ffb347 100%); min-height: 100vh; }
+        
+        .navbar { background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); padding: 15px 0; box-shadow: 0 2px 20px rgba(0,0,0,0.1); }
+        .nav-container { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 0 20px; }
+        .logo { font-size: 1.8em; font-weight: 700; color: #e75480; }
+        .nav-links { display: flex; gap: 30px; }
+        .nav-links a { text-decoration: none; color: #333; font-weight: 500; transition: color 0.3s; }
+        .nav-links a:hover { color: #e75480; }
+        .logout-btn { background: #e75480; color: white; border: none; padding: 10px 20px; border-radius: 25px; cursor: pointer; font-weight: 500; }
+        .logout-btn:hover { background: #d63384; }
+        
+        .profile-container { max-width: 800px; margin: 40px auto; padding: 0 20px; }
+        .profile-card { background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); border-radius: 20px; padding: 40px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); }
+        
+        .profile-header { text-align: center; margin-bottom: 40px; }
+        .profile-avatar { width: 120px; height: 120px; border-radius: 50%; margin: 0 auto 20px; background: linear-gradient(135deg, #e75480, #ffb347); display: flex; align-items: center; justify-content: center; font-size: 3em; color: white; position: relative; overflow: hidden; }
+        .profile-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+        .profile-name { font-size: 2em; font-weight: 300; color: #333; margin-bottom: 10px; }
+        .profile-email { color: #666; font-size: 1.1em; }
+        .profile-badge { display: inline-block; background: #28a745; color: white; padding: 5px 15px; border-radius: 20px; font-size: 0.9em; margin-top: 10px; }
+        
+        .profile-section { margin-bottom: 30px; }
+        .section-title { font-size: 1.3em; font-weight: 500; color: #333; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
+        .section-title i { color: #e75480; }
+        
+        .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
+        .info-item { background: rgba(231,84,128,0.1); padding: 20px; border-radius: 15px; border-left: 4px solid #e75480; }
+        .info-label { font-weight: 500; color: #666; font-size: 0.9em; margin-bottom: 5px; }
+        .info-value { font-size: 1.1em; color: #333; }
+        
+        .edit-profile-btn { background: #e75480; color: white; border: none; padding: 15px 30px; border-radius: 25px; font-size: 1em; font-weight: 500; cursor: pointer; transition: all 0.3s; margin-top: 20px; }
+        .edit-profile-btn:hover { background: #d63384; transform: translateY(-2px); }
+        
+        .orders-section { margin-top: 40px; }
+        .order-item { background: rgba(255,255,255,0.8); padding: 20px; border-radius: 15px; margin-bottom: 15px; border-left: 4px solid #ffb347; }
+        .order-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .order-id { font-weight: 500; color: #333; }
+        .order-status { padding: 5px 15px; border-radius: 20px; font-size: 0.9em; font-weight: 500; }
+        .status-pending { background: #fff3cd; color: #856404; }
+        .status-completed { background: #d4edda; color: #155724; }
+        .order-total { font-weight: 500; color: #e75480; }
+        
+        .empty-state { text-align: center; padding: 40px; color: #666; }
+        .empty-state i { font-size: 3em; margin-bottom: 20px; color: #e75480; }
+        
+        @media (max-width: 768px) {
+            .nav-container { flex-direction: column; gap: 15px; }
+            .nav-links { gap: 20px; }
+            .profile-card { padding: 30px 20px; }
+            .profile-name { font-size: 1.5em; }
+            .info-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <script src="js/auth-guard.js"></script>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <i class="fas fa-gem"></i> Lorena Store
+            </div>
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="index.html#products">Products</a>
+                <a href="about.html">About</a>
+                <a href="contact.html">Contact</a>
+            </div>
+            <button class="logout-btn" id="logoutBtn">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
+        </div>
+    </nav>
+    
+    <div class="profile-container">
+        <div class="profile-card">
+            <div class="profile-header">
+                <div class="profile-avatar" id="profileAvatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <h1 class="profile-name" id="profileName">Loading...</h1>
+                <p class="profile-email" id="profileEmail"></p>
+                <span class="profile-badge" id="profileBadge">Verified Account</span>
+            </div>
+            
+            <div class="profile-section">
+                <h2 class="section-title">
+                    <i class="fas fa-user-circle"></i>
+                    Personal Information
+                </h2>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="info-label">Full Name</div>
+                        <div class="info-value" id="infoName">-</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Email Address</div>
+                        <div class="info-value" id="infoEmail">-</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Phone Number</div>
+                        <div class="info-value" id="infoPhone">-</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Account Type</div>
+                        <div class="info-value" id="infoProvider">-</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Member Since</div>
+                        <div class="info-value" id="infoJoined">-</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Total Orders</div>
+                        <div class="info-value" id="infoOrders">0</div>
+                    </div>
+                </div>
+                <button class="edit-profile-btn" id="editProfileBtn">
+                    <i class="fas fa-edit"></i> Edit Profile
+                </button>
+            </div>
+            
+            <div class="profile-section orders-section">
+                <h2 class="section-title">
+                    <i class="fas fa-shopping-bag"></i>
+                    Recent Orders
+                </h2>
+                <div id="ordersContainer">
+                    <div class="empty-state">
+                        <i class="fas fa-shopping-cart"></i>
+                        <p>No orders yet. Start shopping to see your orders here!</p>
+                        <a href="index.html#products" style="color: #e75480; text-decoration: none; font-weight: 500;">Browse Products</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-storage-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    
+    <script>
+        function waitForFirebase() {
+            if (window.firebaseServices && window.firebaseServices.auth) {
+                initializeProfile();
+            } else {
+                setTimeout(waitForFirebase, 100);
+            }
+        }
+        
+        function initializeProfile() {
+            const { auth, db } = window.firebaseServices;
+            let currentUser = null;
+            
+            // Check authentication state
+            auth.onAuthStateChanged(async (user) => {
+                if (user) {
+                    currentUser = user;
+                    await loadUserProfile(user);
+                    await loadUserOrders(user.uid);
+                } else {
+                    window.location.href = 'login.html';
+                }
+            });
+            
+            // Load user profile
+            async function loadUserProfile(user) {
+                try {
+                    const userDoc = await db.collection('users').doc(user.uid).get();
+                    const userData = userDoc.exists ? userDoc.data() : {};
+                    
+                    // Update profile display
+                    document.getElementById('profileName').textContent = userData.name || user.displayName || 'User';
+                    document.getElementById('profileEmail').textContent = userData.email || user.email || '';
+                    
+                    // Update avatar
+                    const avatar = document.getElementById('profileAvatar');
+                    if (userData.photoURL || user.photoURL) {
+                        avatar.innerHTML = `<img src="${userData.photoURL || user.photoURL}" alt="Profile">`;
+                    }
+                    
+                    // Update info grid
+                    document.getElementById('infoName').textContent = userData.name || user.displayName || '-';
+                    document.getElementById('infoEmail').textContent = userData.email || user.email || '-';
+                    document.getElementById('infoPhone').textContent = userData.phone || user.phoneNumber || '-';
+                    document.getElementById('infoProvider').textContent = getProviderName(userData.provider || 'email');
+                    document.getElementById('infoJoined').textContent = formatDate(userData.createdAt || user.metadata.creationTime);
+                    
+                    // Update badge based on provider
+                    const badge = document.getElementById('profileBadge');
+                    if (userData.provider === 'google') {
+                        badge.textContent = 'Google Account';
+                        badge.style.background = '#db4437';
+                    } else if (userData.provider === 'phone') {
+                        badge.textContent = 'Phone Verified';
+                        badge.style.background = '#25d366';
+                    } else {
+                        badge.textContent = 'Email Verified';
+                        badge.style.background = '#28a745';
+                    }
+                } catch (error) {
+                    console.error('Error loading profile:', error);
+                }
+            }
+            
+            // Load user orders
+            async function loadUserOrders(userId) {
+                try {
+                    const ordersSnapshot = await db.collection('orders')
+                        .where('userId', '==', userId)
+                        .orderBy('createdAt', 'desc')
+                        .limit(5)
+                        .get();
+                    
+                    const orders = ordersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    
+                    document.getElementById('infoOrders').textContent = orders.length;
+                    
+                    const ordersContainer = document.getElementById('ordersContainer');
+                    
+                    if (orders.length === 0) {
+                        ordersContainer.innerHTML = `
+                            <div class="empty-state">
+                                <i class="fas fa-shopping-cart"></i>
+                                <p>No orders yet. Start shopping to see your orders here!</p>
+                                <a href="index.html#products" style="color: #e75480; text-decoration: none; font-weight: 500;">Browse Products</a>
+                            </div>
+                        `;
+                    } else {
+                        ordersContainer.innerHTML = orders.map(order => `
+                            <div class="order-item">
+                                <div class="order-header">
+                                    <span class="order-id">Order #${order.id.substring(0, 8)}</span>
+                                    <span class="order-status status-${order.status || 'pending'}">${order.status || 'Pending'}</span>
+                                </div>
+                                <div style="color: #666; margin-bottom: 10px;">
+                                    ${formatDate(order.createdAt)} • ${order.items?.length || 0} items
+                                </div>
+                                <div class="order-total">Total: ₦${order.total?.toLocaleString() || '0'}</div>
+                            </div>
+                        `).join('');
+                    }
+                } catch (error) {
+                    console.error('Error loading orders:', error);
+                }
+            }
+            
+            // Helper functions
+            function getProviderName(provider) {
+                switch (provider) {
+                    case 'google': return 'Google Account';
+                    case 'phone': return 'Phone Number';
+                    case 'email': return 'Email & Password';
+                    default: return 'Email & Password';
+                }
+            }
+            
+            function formatDate(date) {
+                if (!date) return '-';
+                const d = date.toDate ? date.toDate() : new Date(date);
+                return d.toLocaleDateString('en-US', { 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                });
+            }
+            
+            // Logout functionality
+            document.getElementById('logoutBtn').addEventListener('click', async () => {
+                try {
+                    await auth.signOut();
+                    window.location.href = 'index.html';
+                } catch (error) {
+                    console.error('Error signing out:', error);
+                }
+            });
+            
+            // Edit profile (placeholder)
+            document.getElementById('editProfileBtn').addEventListener('click', () => {
+                alert('Profile editing feature coming soon!');
+            });
+        }
+        
+        // Start initialization
+        document.addEventListener('DOMContentLoaded', waitForFirebase);
+    </script>
+</body>
+</html>

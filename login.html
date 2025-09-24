@@ -4,133 +4,147 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Lorena Store</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <script src="https://kit.fontawesome.com/4a3b1f73a2.js"></script>
+    <link href="https://fonts.googleapis.com/css?family=Lato&display=swap" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="js/simple-users.js"></script>
+    <script src="js/auth.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Roboto', sans-serif; background: linear-gradient(135deg, #e75480 0%, #ffb347 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; }
-        .login-container { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
-        .logo { text-align: center; margin-bottom: 30px; }
-        .logo i { font-size: 3em; color: #e75480; margin-bottom: 10px; }
-        .logo h1 { color: #333; font-weight: 300; font-size: 2em; }
-        .form-group { margin-bottom: 20px; position: relative; }
-        .form-group input { width: 100%; padding: 15px 20px 15px 50px; border: 2px solid #eee; border-radius: 10px; font-size: 16px; transition: all 0.3s; }
+        body { font-family: 'Lato', sans-serif; background: linear-gradient(135deg, #e75480, #ff6b9d); min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+        .login-container { background: white; padding: 2rem; border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
+        .logo { text-align: center; margin-bottom: 2rem; }
+        .logo h1 { color: #e75480; font-size: 2rem; margin-bottom: 0.5rem; }
+        .logo p { color: #666; }
+        .form-group { margin-bottom: 1.5rem; }
+        .form-group label { display: block; margin-bottom: 0.5rem; color: #333; font-weight: bold; }
+        .form-group input { width: 100%; padding: 1rem; border: 2px solid #ddd; border-radius: 10px; font-size: 1rem; transition: border-color 0.3s; }
         .form-group input:focus { outline: none; border-color: #e75480; }
-        .form-group i { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); color: #999; }
-        .btn { width: 100%; padding: 15px; background: #e75480; color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: 500; cursor: pointer; transition: all 0.3s; }
-        .btn:hover { background: #d63384; transform: translateY(-2px); }
-        .error { color: #dc3545; text-align: center; margin: 10px 0; font-size: 14px; }
-        .success { color: #28a745; text-align: center; margin: 10px 0; font-size: 14px; }
-        .switch { text-align: center; margin-top: 20px; }
-        .switch a { color: #e75480; text-decoration: none; font-weight: 500; }
-        .switch a:hover { text-decoration: underline; }
-        .back-home { position: absolute; top: 20px; left: 20px; color: white; font-size: 24px; text-decoration: none; }
-        .back-home:hover { color: #f0f0f0; }
+        .btn { width: 100%; background: #e75480; color: white; border: none; padding: 1rem; border-radius: 10px; font-size: 1rem; cursor: pointer; transition: background 0.3s; }
+        .btn:hover { background: #d63384; }
+        .btn:disabled { background: #ccc; cursor: not-allowed; }
+        .divider { text-align: center; margin: 1.5rem 0; color: #666; }
+        .social-login { display: flex; gap: 1rem; margin-bottom: 1.5rem; }
+        .social-btn { flex: 1; padding: 0.8rem; border: 2px solid #ddd; border-radius: 10px; background: white; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5rem; transition: all 0.3s; }
+        .social-btn:hover { border-color: #e75480; }
+        .google { color: #db4437; }
+        .facebook { color: #4267B2; }
+        .links { text-align: center; margin-top: 1.5rem; }
+        .links a { color: #e75480; text-decoration: none; }
+        .links a:hover { text-decoration: underline; }
+        .error { background: #f8d7da; color: #721c24; padding: 0.8rem; border-radius: 8px; margin-bottom: 1rem; }
+        .success { background: #d4edda; color: #155724; padding: 0.8rem; border-radius: 8px; margin-bottom: 1rem; }
     </style>
 </head>
 <body>
-    <a href="index.html" class="back-home" title="Back to Home"><i class="fas fa-arrow-left"></i></a>
-    
     <div class="login-container">
         <div class="logo">
-            <i class="fas fa-gem"></i>
             <h1>Lorena Store</h1>
-            <p style="color: #666; margin-top: 10px;">Welcome back!</p>
+            <p>Welcome back! Please sign in to your account</p>
         </div>
-        
+
+        <div id="message"></div>
+
+        <div class="social-login">
+            <button class="social-btn google" onclick="loginWithGoogle()">
+                <i class="fab fa-google"></i>
+                Google
+            </button>
+            <button class="social-btn facebook" onclick="loginWithFacebook()">
+                <i class="fab fa-facebook-f"></i>
+                Facebook
+            </button>
+        </div>
+
+        <div class="divider">or sign in with email/phone</div>
+
         <form id="loginForm">
             <div class="form-group">
-                <i class="fas fa-user"></i>
-                <input type="text" id="identifier" placeholder="Email or Phone Number" required>
+                <label for="identifier">Email or Phone Number</label>
+                <input type="text" id="identifier" required placeholder="Enter your email or phone">
             </div>
-            
             <div class="form-group">
-                <i class="fas fa-lock"></i>
-                <input type="password" id="password" placeholder="Password" required>
+                <label for="password">Password</label>
+                <input type="password" id="password" required placeholder="Enter your password">
             </div>
-            
-            <div id="message" class="error" style="display: none;"></div>
-            
-            <button type="submit" class="btn">
-                <span id="btnText">Sign In</span>
-                <i id="btnLoader" class="fas fa-spinner fa-spin" style="display: none;"></i>
+            <button type="submit" class="btn" id="loginBtn">
+                <i class="fas fa-sign-in-alt"></i> Sign In
             </button>
         </form>
-        
-        <div class="switch">
-            Don't have an account? <a href="register.html">Sign Up</a>
+
+        <div class="links">
+            <p>Don't have an account? <a href="register.html">Sign up here</a></p>
+            <p><a href="forgot-password.html">Forgot Password?</a></p>
+            <p><a href="index.html">Back to Store</a></p>
         </div>
     </div>
 
     <script>
-        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+        // Check if already logged in
+        if (AuthManager.checkAuth()) {
+            window.location.href = 'profile.html';
+        }
+
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
-            const identifier = document.getElementById('identifier').value.trim();
+            const identifier = document.getElementById('identifier').value;
             const password = document.getElementById('password').value;
-            const messageEl = document.getElementById('message');
-            const btnText = document.getElementById('btnText');
-            const btnLoader = document.getElementById('btnLoader');
+            const loginBtn = document.getElementById('loginBtn');
+            const messageDiv = document.getElementById('message');
             
-            if (!identifier || !password) {
-                showMessage('Please fill in all fields', 'error');
-                return;
-            }
-            
-            // Show loading
-            btnText.style.display = 'none';
-            btnLoader.style.display = 'inline';
+            loginBtn.disabled = true;
+            loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing in...';
             
             try {
-                // Try backend first
-                const response = await fetch('http://localhost:4000/api/auth/login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ identifier, password })
-                });
-                
-                const data = await response.json();
-                
-                if (response.ok) {
-                    localStorage.setItem('currentUser', JSON.stringify(data.user));
-                    showMessage('Login successful! Redirecting...', 'success');
-                    setTimeout(() => window.location.href = 'profile.html', 1000);
-                } else {
-                    showMessage(data.error || 'Login failed', 'error');
-                }
+                await AuthManager.loginUser(identifier, password);
+                messageDiv.innerHTML = '<div class="success">Login successful! Redirecting...</div>';
+                setTimeout(() => {
+                    window.location.href = 'profile.html';
+                }, 1000);
             } catch (error) {
-                // Fallback to localStorage authentication
-                const users = JSON.parse(localStorage.getItem('registeredUsers') || '{}');
-                const user = users[identifier];
-                
-                if (user && user.password === password) {
-                    localStorage.setItem('currentUser', JSON.stringify({
-                        identifier: identifier,
-                        name: user.name,
-                        phone: user.phone || ''
-                    }));
-                    showMessage('Login successful! Redirecting...', 'success');
-                    setTimeout(() => window.location.href = 'profile.html', 1000);
-                } else {
-                    showMessage('Invalid credentials. Please try again.', 'error');
-                }
-            } finally {
-                btnText.style.display = 'inline';
-                btnLoader.style.display = 'none';
+                messageDiv.innerHTML = `<div class="error">${error.message}</div>`;
+                loginBtn.disabled = false;
+                loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Sign In';
             }
         });
-        
-        function showMessage(text, type) {
-            const messageEl = document.getElementById('message');
-            messageEl.textContent = text;
-            messageEl.className = type;
-            messageEl.style.display = 'block';
-            setTimeout(() => messageEl.style.display = 'none', 5000);
+
+        function loginWithGoogle() {
+            // Simulate Google login
+            const email = prompt('Enter your Gmail address:');
+            if (email && email.includes('@gmail.com')) {
+                const name = email.split('@')[0];
+                simulateSocialLogin(name, email);
+            }
         }
-        
-        // Check if user is already logged in
-        if (localStorage.getItem('currentUser')) {
-            window.location.href = 'profile.html';
+
+        function loginWithFacebook() {
+            // Simulate Facebook login
+            const email = prompt('Enter your email address:');
+            if (email) {
+                const name = email.split('@')[0];
+                simulateSocialLogin(name, email);
+            }
+        }
+
+        async function simulateSocialLogin(name, email) {
+            try {
+                // Try to login first
+                try {
+                    await AuthManager.loginUser(email, 'social_login_' + email);
+                } catch (error) {
+                    // If login fails, register new user
+                    await AuthManager.registerUser(name, email, 'social_login_' + email);
+                }
+                
+                document.getElementById('message').innerHTML = '<div class="success">Social login successful! Redirecting...</div>';
+                setTimeout(() => {
+                    window.location.href = 'profile.html';
+                }, 1000);
+            } catch (error) {
+                document.getElementById('message').innerHTML = `<div class="error">Social login failed: ${error.message}</div>`;
+            }
         }
     </script>
 </body>

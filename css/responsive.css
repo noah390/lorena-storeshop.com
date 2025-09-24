@@ -1,0 +1,296 @@
+/* Enhanced Mobile Responsive Styles for All Devices */
+
+/* Base responsive adjustments */
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+}
+
+/* Header adjustments for fixed positioning */
+body {
+    padding-top: 80px;
+}
+
+/* Large tablets and small desktops */
+@media (max-width: 1200px) {
+    #container {
+        padding: 15px 30px !important;
+    }
+    
+    #input {
+        width: 20em !important;
+    }
+}
+
+/* Tablets */
+@media (max-width: 1024px) {
+    #container {
+        grid-template-columns: 1.2fr 2fr 3fr 1fr !important;
+        padding: 15px 25px !important;
+    }
+    
+    #shopName {
+        font-size: 32px !important;
+    }
+    
+    #collection {
+        font-size: 13px !important;
+    }
+    
+    #input {
+        width: 18em !important;
+    }
+}
+
+/* Small tablets */
+@media (max-width: 768px) {
+    body {
+        padding-top: 70px;
+    }
+    
+    #container {
+        grid-template-columns: 1fr 1fr 0.8fr !important;
+        padding: 12px 20px !important;
+    }
+    
+    #search {
+        display: none !important;
+    }
+    
+    #collection {
+        display: none !important;
+    }
+    
+    #mobileMenuToggle {
+        display: block !important;
+        justify-self: center;
+    }
+    
+    #shopName {
+        font-size: 28px !important;
+    }
+    
+    .userIcon {
+        font-size: 35px !important;
+    }
+    
+    .addedToCart {
+        font-size: 1.3em !important;
+        margin-right: 20px !important;
+    }
+    
+    /* Auth buttons mobile */
+    .auth-buttons {
+        position: fixed !important;
+        top: 10px !important;
+        right: 10px !important;
+        flex-direction: column !important;
+        gap: 5px !important;
+    }
+    
+    .auth-btn {
+        padding: 6px 12px !important;
+        font-size: 11px !important;
+    }
+    
+    /* Content adjustments */
+    h1 {
+        font-size: 1.8em !important;
+        padding: 30px 0 !important;
+        width: 95% !important;
+    }
+    
+    #containerClothing, #containerAccessories {
+        grid-template-columns: repeat(2, 1fr) !important;
+        width: 95% !important;
+        grid-gap: 20px !important;
+    }
+    
+    /* Footer adjustments */
+    #containerFooter {
+        grid-template-columns: 1fr 1fr !important;
+        padding: 15px 20px !important;
+        font-size: 12px !important;
+    }
+}
+
+/* Mobile landscape */
+@media (max-width: 640px) {
+    #container {
+        padding: 10px 15px !important;
+    }
+    
+    #shopName {
+        font-size: 24px !important;
+    }
+    
+    #collection {
+        font-size: 11px !important;
+    }
+    
+    .userIcon {
+        font-size: 32px !important;
+    }
+}
+
+/* Mobile portrait */
+@media (max-width: 480px) {
+    body {
+        padding-top: 65px;
+    }
+    
+    #container {
+        grid-template-columns: 1fr 1fr 0.7fr !important;
+        padding: 8px 12px !important;
+    }
+    
+    #shopName {
+        font-size: 20px !important;
+    }
+    
+    #mobileMenuToggle {
+        font-size: 20px !important;
+    }
+    
+    #mobileMenu {
+        top: 65px !important;
+    }
+    
+    .userIcon {
+        font-size: 28px !important;
+    }
+    
+    .addedToCart {
+        font-size: 1.1em !important;
+        margin-right: 15px !important;
+    }
+    
+    /* Content mobile */
+    h1 {
+        font-size: 1.4em !important;
+        padding: 20px 0 !important;
+    }
+    
+    h2 {
+        font-size: 1.2em !important;
+    }
+    
+    #containerClothing, #containerAccessories {
+        grid-template-columns: 1fr !important;
+        width: 90% !important;
+        grid-gap: 15px !important;
+    }
+    
+    #box {
+        max-width: 280px !important;
+        margin: 0 auto !important;
+    }
+    
+    /* Footer mobile */
+    #containerFooter {
+        grid-template-columns: 1fr !important;
+        padding: 15px !important;
+        text-align: center;
+        font-size: 11px !important;
+    }
+    
+    #containerFooter > div {
+        margin-bottom: 20px;
+    }
+}
+
+/* Small mobile */
+@media (max-width: 360px) {
+    body {
+        padding-top: 60px;
+    }
+    
+    #container {
+        padding: 6px 10px !important;
+    }
+    
+    #shopName {
+        font-size: 18px !important;
+    }
+    
+    #collection {
+        font-size: 9px !important;
+    }
+    
+    .userIcon {
+        font-size: 25px !important;
+    }
+    
+    .addedToCart {
+        font-size: 1em !important;
+        margin-right: 12px !important;
+    }
+    
+    h1 {
+        font-size: 1.2em !important;
+        padding: 15px 0 !important;
+    }
+    
+    #box {
+        max-width: 250px !important;
+    }
+}
+
+/* Touch-friendly improvements */
+@media (hover: none) and (pointer: coarse) {
+    .auth-btn, #collection a, #user a {
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    #collection a {
+        padding: 8px 4px;
+    }
+}
+
+/* Landscape orientation adjustments */
+@media (max-height: 500px) and (orientation: landscape) {
+    body {
+        padding-top: 50px;
+    }
+    
+    #container {
+        padding: 5px 15px !important;
+    }
+    
+    .auth-buttons {
+        top: 5px !important;
+        right: 5px !important;
+    }
+}
+
+/* High DPI displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    #shopName, #collection, .userIcon {
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+}
+
+/* Print styles */
+@media print {
+    .auth-buttons, #search, #user {
+        display: none !important;
+    }
+    
+    body {
+        padding-top: 0;
+    }
+    
+    #container {
+        position: static;
+        box-shadow: none;
+    }
+}

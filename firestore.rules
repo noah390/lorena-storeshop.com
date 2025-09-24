@@ -1,0 +1,17 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Products collection
+    match /products/{document} {
+      // Allow read access to everyone
+      allow read: if true;
+      // Allow write access only to authenticated users
+      allow write: if request.auth != null;
+    }
+    
+    // Deny access to all other collections
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

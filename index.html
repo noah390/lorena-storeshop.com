@@ -2,170 +2,339 @@
 <html lang="en">
 <head>
     <link rel="stylesheet" href="css/presidential.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <link rel="stylesheet" href="css/mobile-utils.css">
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <!-- <link rel="stylesheet" href="/style.css"> -->
-    <title> Lorena Store - Fashion & Accessories </title>
-    <!-- favicon -->
+    <title>Lorena Store - Fashion & Accessories</title>
     <link rel="icon" href="https://yt3.ggpht.com/a/AGF-l78km1YyNXmF0r3-0CycCA0HLA_i6zYn_8NZEg=s900-c-k-c0xffffffff-no-rj-mo" type="image/gif" sizes="16x16">
-    <!-- header links -->
     <script src="https://kit.fontawesome.com/4a3b1f73a2.js"></script>
     <link href="https://fonts.googleapis.com/css?family=Lato&display=swap" rel="stylesheet">
-    <!-- slider links -->
-    <!-- <script src="http://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script> -->
     <script src="js/jQuery3.4.1.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="js/simple-users.js"></script>
+    <script src="js/auth-codes.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/checkout.js"></script>
+    <script src="js/cart-functions.js"></script>
+    <script src="js/realtime-products.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.9.0/slick.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.9.0/slick-theme.min.css">
+    
+    <!-- Cart Sidebar Styles -->
     <style>
-        .auth-buttons {
+        .cart-sidebar {
             position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 1000;
+            right: -400px;
+            top: 0;
+            width: 400px;
+            height: 100vh;
+            background: white;
+            box-shadow: -5px 0 15px rgba(0,0,0,0.1);
+            transition: right 0.3s;
+            z-index: 2000;
+            overflow-y: auto;
+        }
+        .cart-sidebar.open { right: 0; }
+        .cart-header {
+            background: #e75480;
+            color: white;
+            padding: 1rem;
             display: flex;
-            gap: 10px;
+            justify-content: space-between;
+            align-items: center;
         }
-        .auth-btn {
-            padding: 10px 20px;
+        .cart-content { padding: 1rem; }
+        .cart-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 0;
+            border-bottom: 1px solid #eee;
+        }
+        .cart-item img { width: 60px; height: 60px; object-fit: cover; border-radius: 8px; }
+        .cart-item-info { flex: 1; }
+        .cart-item-name { font-weight: bold; margin-bottom: 0.5rem; }
+        .cart-item-price { color: #e75480; font-weight: bold; }
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin: 0.5rem 0;
+        }
+        .quantity-btn {
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .cart-total {
+            background: #f8f9fa;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .total-amount { font-size: 1.5rem; font-weight: bold; color: #e75480; margin-bottom: 1rem; }
+        .checkout-buttons { display: flex; flex-direction: column; gap: 0.5rem; }
+        .checkout-btn {
+            padding: 0.8rem;
             border: none;
-            border-radius: 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
             font-weight: 500;
-            text-decoration: none;
-            transition: all 0.3s;
-            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
         }
-        .login-btn {
-            background: transparent;
-            color: #e75480;
-            border: 2px solid #e75480;
+        .btn-whatsapp { background: #25d366; color: white; }
+        .btn-email { background: #007bff; color: white; }
+        .btn-phone { background: #ff6b35; color: white; }
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1500;
+            display: none;
         }
-        .login-btn:hover {
-            background: #e75480;
-            color: white;
+        .overlay.show { display: block; }
+        
+        /* Checkout Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 3000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
         }
-        .signup-btn {
-            background: #e75480;
-            color: white;
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 2rem;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            position: relative;
         }
-        .signup-btn:hover {
-            background: #d63384;
-            transform: translateY(-2px);
+        .modal-content .close {
+            position: absolute;
+            right: 1rem;
+            top: 1rem;
+            font-size: 1.5rem;
+            cursor: pointer;
         }
-        .user-welcome {
-            background: rgba(255,255,255,0.9);
-            padding: 8px 16px;
-            border-radius: 20px;
-            color: #e75480;
-            font-weight: 500;
+        .modal-content input, .modal-content textarea {
+            width: 100%;
+            padding: 0.8rem;
+            margin-bottom: 1rem;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+        .modal-content input:focus, .modal-content textarea:focus {
+            outline: none;
+            border-color: #e75480;
+        }
+        .form-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+        .form-buttons button {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        .form-buttons button[type="button"] { background: #6c757d; color: white; }
+        .form-buttons button[type="submit"] { background: #e75480; color: white; }
+        
+        @media (max-width: 768px) {
+            .cart-sidebar { width: 100%; right: -100%; }
         }
     </style>
 </head>
 
 <body>
-    <!-- Auth Buttons -->
-    <div class="auth-buttons" id="authButtons">
-        <a href="login.html" class="auth-btn login-btn">Login</a>
-        <a href="register.html" class="auth-btn signup-btn">Sign Up</a>
-    </div>
-    
-    <div class="auth-buttons" id="userWelcome" style="display: none;">
-        <span class="user-welcome" id="welcomeText">Welcome!</span>
-    </div>
     <!-- HEADER -->
     <div id="1"></div>
-    <script>
-        load("header.html");
-        function load(url)
-        {
-            req = new XMLHttpRequest();
-            req.open("GET", url, false);
-            req.send(null);
-            document.getElementById(1).innerHTML = req.responseText;
-        }
-    </script>
     <!-- SLIDER -->
     <div id="2"></div>
-    <script>
-        load("slider.html");
-        function load(url)
-        {
-            req = new XMLHttpRequest();
-            req.open("GET", url, false);
-            req.send(null);
-            document.getElementById(2).innerHTML = req.responseText;
-        }
-    </script>
-
     <!-- CONTENT SECTION -->
     <div id="3"></div>
-    <script>
-        load("content.html");
-        function load(url)
-        {
-            req = new XMLHttpRequest();
-            req.open("GET", url, false);
-            req.send(null);
-            document.getElementById(3).innerHTML = req.responseText;
-        }
-    </script>
-
+    
+    <!-- Products Section -->
+    <section id="products" style="padding: 4rem 0; background: linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(248,249,250,0.9) 100%); backdrop-filter: blur(10px);">
+        <div style="max-width: 1200px; margin: 0 auto; padding: 0 1rem;">
+            <h2 style="text-align: center; margin-bottom: 3rem; font-size: 3rem; background: linear-gradient(135deg, #e75480, #ff6b9d); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-family: 'Pacifico', cursive;">Featured Products</h2>
+            <div id="products-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem;">
+                <div style="text-align: center; padding: 2rem; color: #666;">Loading amazing products...</div>
+            </div>
+        </div>
+    </section>
+    
     <!-- FOOTER -->
     <div id="4"></div>
+
+    <!-- Cart Sidebar -->
+    <div id="cart-sidebar" class="cart-sidebar">
+        <div class="cart-header">
+            <h3><i class="fas fa-shopping-cart"></i> Shopping Cart</h3>
+            <button onclick="toggleCart()" style="background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer;">&times;</button>
+        </div>
+        <div class="cart-content">
+            <div id="cart-items"></div>
+            <div id="cart-total" class="cart-total" style="display: none;">
+                <div class="total-amount">Total: ₦<span id="total-amount">0</span></div>
+                <div class="checkout-buttons">
+                    <button class="checkout-btn btn-whatsapp" onclick="checkoutWhatsApp()">
+                        <i class="fab fa-whatsapp"></i> WhatsApp Checkout
+                    </button>
+                    <button class="checkout-btn btn-email" onclick="checkoutEmail()">
+                        <i class="fas fa-envelope"></i> Email Checkout
+                    </button>
+                    <button class="checkout-btn btn-phone" onclick="checkoutPhone()">
+                        <i class="fas fa-phone"></i> Call to Order
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Checkout Modal -->
+    <div id="checkout-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeCheckoutModal()">&times;</span>
+            <h2>Checkout Details</h2>
+            <form id="checkout-form">
+                <input type="text" id="customer-name" placeholder="Full Name" required>
+                <input type="tel" id="customer-phone" placeholder="Phone Number" required>
+                <input type="email" id="customer-email" placeholder="Email Address" required>
+                <textarea id="customer-address" placeholder="Delivery Address (Optional)"></textarea>
+                <div class="form-buttons">
+                    <button type="button" onclick="closeCheckoutModal()">Cancel</button>
+                    <button type="submit" id="submit-order">Complete Order</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Overlay -->
+    <div class="overlay" onclick="toggleCart()"></div>
+
     <script>
-        load("footer.html");
-        function load(url)
-        {
-            req = new XMLHttpRequest();
+        // Initialize cart display on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            updateCartDisplay();
+        });
+    </script>
+</body>
+</html>ton" onclick="closeCheckoutModal()">Cancel</button>
+                    <button type="submit" id="submit-order">Complete Order</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Overlay -->
+    <div class="overlay" onclick="toggleCart()"></div>
+
+    <script>
+        // Initialize cart display on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            updateCartDisplay();
+        });
+    </script>
+</body>
+</html>ton>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Formspree Fallback Form -->
+    <form id="formspree-form" action="https://formspree.io/f/your-form-id" method="POST" style="display: none;">
+        <input type="hidden" name="_subject" value="New Order from Lorena Store">
+        <input type="hidden" name="_next" value="https://yourusername.github.io/your-repo/thank-you.html">
+        <input type="hidden" name="customer-name" id="form-name">
+        <input type="hidden" name="customer-phone" id="form-phone">
+        <input type="hidden" name="customer-email" id="form-email">
+        <input type="hidden" name="customer-address" id="form-address">
+        <input type="hidden" name="order-details" id="form-order-details">
+    </form>
+
+    <div id="overlay" class="overlay" onclick="toggleCart()"></div>
+
+    <!-- Firebase Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="js/firebase-products.js"></script>
+    
+    <script>
+        function loadContent(url, elementId) {
+            const req = new XMLHttpRequest();
             req.open("GET", url, false);
             req.send(null);
-            document.getElementById(4).innerHTML = req.responseText;
+            document.getElementById(elementId).innerHTML = req.responseText;
         }
+        
+        function scrollToProducts() {
+            const productsSection = document.getElementById('products');
+            if (productsSection) {
+                productsSection.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+        
+        // Handle hash navigation
+        window.addEventListener('load', function() {
+            if (window.location.hash === '#products') {
+                setTimeout(() => scrollToProducts(), 500);
+            }
+        });
+        
+        // Load all sections
+        loadContent("header.html", 1);
+        loadContent("slider.html", 2);
+        loadContent("content.html", 3);
+        loadContent("footer.html", 4);
     </script>
 
-</body>
-
-<!-- slider JS START -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.9.0/slick.min.js"></script>
-<script>
-    $(document).ready(function()
-    {
-    $('#containerSlider').slick({
-        dots: true,
-        infinite: true,
-        slidesToShow: 1,
-        slidesToScroll: 1,
-        autoplay: true,
-        autoplaySpeed: 1500,
+    <!-- Slider JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.9.0/slick.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#containerSlider').slick({
+                dots: true,
+                infinite: true,
+                slidesToShow: 1,
+                slidesToScroll: 1,
+                autoplay: true,
+                autoplaySpeed: 1500,
+            });
         });
-    });
-</script>
-<!-- slider JS ENDS -->
+    </script>
 
-<!-- content JS -->
-<script src="content.js"></script>
-
-<script>
-// Check if user is logged in and update auth buttons
-document.addEventListener('DOMContentLoaded', function() {
-    const currentUser = localStorage.getItem('currentUser');
-    const authButtons = document.getElementById('authButtons');
-    const userWelcome = document.getElementById('userWelcome');
-    const welcomeText = document.getElementById('welcomeText');
-    
-    if (currentUser) {
-        try {
-            const user = JSON.parse(currentUser);
-            authButtons.style.display = 'none';
-            userWelcome.style.display = 'flex';
-            welcomeText.textContent = `Welcome, ${user.name || user.identifier}!`;
-            welcomeText.onclick = () => window.location.href = 'profile.html';
-            welcomeText.style.cursor = 'pointer';
-        } catch (e) {
-            localStorage.removeItem('currentUser');
-        }
-    }
-});
-</script>
-
+    <!-- User Tracker -->
+    <script type="module" src="js/user-tracker.js"></script>
+    <!-- Content JS -->
+    <script src="content.js"></script>
+    <!-- Main Script -->
+    <script src="script.js"></script>
+</body>
 </html>

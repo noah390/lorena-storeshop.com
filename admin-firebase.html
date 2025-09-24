@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firebase Admin Panel - Lorena Store</title>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-storage-compat.js"></script>
+    <script src="js/demo-data.js"></script>
+    <script src="js/env-config.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #f5f5f5; }
+        .header { background: #e75480; color: white; padding: 1rem; display: flex; justify-content: space-between; align-items: center; }
+        .logout-btn { background: rgba(255,255,255,0.2); border: none; color: white; padding: 8px 16px; border-radius: 4px; cursor: pointer; }
+        .container { max-width: 1200px; margin: 2rem auto; padding: 0 1rem; }
+        .card { background: white; border-radius: 8px; padding: 1.5rem; margin-bottom: 2rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .form-group { margin-bottom: 1rem; }
+        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: bold; }
+        .form-group input, .form-group textarea { width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px; }
+        .btn { background: #e75480; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 4px; cursor: pointer; margin-right: 0.5rem; }
+        .btn:hover { background: #d63384; }
+        .btn:disabled { background: #ccc; cursor: not-allowed; }
+        .btn-danger { background: #dc3545; }
+        .btn-danger:hover { background: #c82333; }
+        .btn-edit { background: #28a745; }
+        .btn-edit:hover { background: #218838; }
+        .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem; }
+        .product-card { border: 1px solid #ddd; border-radius: 8px; padding: 1rem; }
+        .product-card img { width: 100%; height: 200px; object-fit: cover; border-radius: 4px; margin-bottom: 1rem; }
+        .product-actions { display: flex; gap: 0.5rem; margin-top: 1rem; }
+        .login-form { max-width: 400px; margin: 5rem auto; background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .hidden { display: none; }
+        .message { padding: 1rem; border-radius: 4px; margin-bottom: 1rem; }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; }
+        .modal-content { background: white; margin: 5% auto; padding: 2rem; border-radius: 8px; max-width: 500px; }
+        .close { float: right; font-size: 28px; font-weight: bold; cursor: pointer; }
+        .upload-progress { width: 100%; height: 4px; background: #f0f0f0; border-radius: 2px; margin: 1rem 0; }
+        .upload-progress-bar { height: 100%; background: #e75480; border-radius: 2px; width: 0%; transition: width 0.3s; }
+    </style>
+</head>
+<body>
+    <!-- Login Form -->
+    <div id="loginSection" class="login-form">
+        <h2>Firebase Admin Login</h2>
+        <div id="loginMessage"></div>
+        <form id="loginForm">
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="loginEmail" required>
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="loginPassword" required>
+            </div>
+            <button type="submit" class="btn">Login</button>
+        </form>
+        <p style="margin-top: 1rem; color: #666; font-size: 14px;">
+            Create admin user in Firebase Authentication
+        </p>
+        <p style="margin-top: 0.5rem;"><a href="index.html">← Back to Store</a></p>
+    </div>
+
+    <!-- Admin Dashboard -->
+    <div id="dashboardSection" class="hidden">
+        <div class="header">
+            <h1>Firebase Admin Panel - Lorena Store</h1>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+
+        <div class="container">
+            <div id="dashboardMessage"></div>
+            
+            <div class="card">
+                <h2>Add New Product</h2>
+                <form id="productForm">
+                    <div class="form-group">
+                        <label>Product Name</label>
+                        <input type="text" id="productName" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea id="productDescription" rows="3" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Price (₦)</label>
+                        <input type="number" id="productPrice" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Product Image</label>
+                        <input type="file" id="productImage" accept="image/*" required>
+                    </div>
+                    <div class="upload-progress hidden">
+                        <div class="upload-progress-bar" id="uploadProgress"></div>
+                    </div>
+                    <button type="submit" class="btn" id="addProductBtn">Add Product</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <h2>Manage Products</h2>
+                <div id="productsContainer" class="products-grid"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Product Modal -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeEditModal()">&times;</span>
+            <h2>Edit Product</h2>
+            <form id="editProductForm">
+                <input type="hidden" id="editProductId">
+                <div class="form-group">
+                    <label>Product Name</label>
+                    <input type="text" id="editProductName" required>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="editProductDescription" rows="3" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Price (₦)</label>
+                    <input type="number" id="editProductPrice" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label>New Image (optional)</label>
+                    <input type="file" id="editProductImage" accept="image/*">
+                </div>
+                <div class="upload-progress hidden">
+                    <div class="upload-progress-bar" id="editUploadProgress"></div>
+                </div>
+                <button type="submit" class="btn" id="updateProductBtn">Update Product</button>
+                <button type="button" class="btn btn-danger" onclick="closeEditModal()">Cancel</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let currentUser = null;
+
+        // Check authentication state
+        function checkAuthState() {
+            const demoAdmin = localStorage.getItem('demoAdmin');
+            if (demoAdmin) {
+                currentUser = JSON.parse(demoAdmin);
+                showDashboard();
+            } else {
+                currentUser = null;
+                showLogin();
+            }
+        }
+        
+        // Initialize auth check
+        checkAuthState();
+
+        // Login form handler
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            try {
+                const user = await FirebaseAPI.loginAdmin(email, password);
+                localStorage.setItem('demoAdmin', JSON.stringify(user));
+                currentUser = user;
+                showMessage('loginMessage', 'Login successful!', 'success');
+                setTimeout(showDashboard, 1000);
+            } catch (error) {
+                showMessage('loginMessage', error.message, 'error');
+            }
+        });
+
+        // Add product form handler
+        document.getElementById('productForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const name = document.getElementById('productName').value;
+            const description = document.getElementById('productDescription').value;
+            const price = parseFloat(document.getElementById('productPrice').value);
+            const imageFile = document.getElementById('productImage').files[0];
+            
+            if (!imageFile) {
+                showMessage('dashboardMessage', 'Please select an image', 'error');
+                return;
+            }
+            
+            const addBtn = document.getElementById('addProductBtn');
+            const progressContainer = document.querySelector('.upload-progress');
+            const progressBar = document.getElementById('uploadProgress');
+            
+            try {
+                addBtn.disabled = true;
+                addBtn.textContent = 'Uploading...';
+                progressContainer.classList.remove('hidden');
+                
+                // Simulate upload progress
+                let progress = 0;
+                const progressInterval = setInterval(() => {
+                    progress += 10;
+                    progressBar.style.width = progress + '%';
+                    if (progress >= 90) clearInterval(progressInterval);
+                }, 100);
+                
+                const imageURL = await FirebaseAPI.uploadImage(imageFile);
+                progressBar.style.width = '100%';
+                
+                const product = { name, description, price, imageURL };
+                await FirebaseAPI.addProduct(product);
+                
+                document.getElementById('productForm').reset();
+                loadProducts();
+                showMessage('dashboardMessage', 'Product added successfully!', 'success');
+            } catch (error) {
+                showMessage('dashboardMessage', error.message, 'error');
+            } finally {
+                addBtn.disabled = false;
+                addBtn.textContent = 'Add Product';
+                progressContainer.classList.add('hidden');
+                progressBar.style.width = '0%';
+            }
+        });
+
+        // Edit product form handler
+        document.getElementById('editProductForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const id = document.getElementById('editProductId').value;
+            const name = document.getElementById('editProductName').value;
+            const description = document.getElementById('editProductDescription').value;
+            const price = parseFloat(document.getElementById('editProductPrice').value);
+            const imageFile = document.getElementById('editProductImage').files[0];
+            
+            const updateBtn = document.getElementById('updateProductBtn');
+            const progressContainer = document.querySelectorAll('.upload-progress')[1];
+            const progressBar = document.getElementById('editUploadProgress');
+            
+            try {
+                updateBtn.disabled = true;
+                updateBtn.textContent = 'Updating...';
+                
+                let product = { name, description, price };
+                
+                if (imageFile) {
+                    progressContainer.classList.remove('hidden');
+                    const imageURL = await FirebaseAPI.uploadImage(imageFile);
+                    product.imageURL = imageURL;
+                    progressContainer.classList.add('hidden');
+                }
+                
+                await FirebaseAPI.updateProduct(id, product);
+                
+                closeEditModal();
+                loadProducts();
+                showMessage('dashboardMessage', 'Product updated successfully!', 'success');
+            } catch (error) {
+                showMessage('dashboardMessage', error.message, 'error');
+            } finally {
+                updateBtn.disabled = false;
+                updateBtn.textContent = 'Update Product';
+            }
+        });
+
+        function showLogin() {
+            document.getElementById('loginSection').classList.remove('hidden');
+            document.getElementById('dashboardSection').classList.add('hidden');
+        }
+
+        function showDashboard() {
+            document.getElementById('loginSection').classList.add('hidden');
+            document.getElementById('dashboardSection').classList.remove('hidden');
+            loadProducts();
+        }
+
+        async function loadProducts() {
+            try {
+                const products = await FirebaseAPI.getProducts();
+                const container = document.getElementById('productsContainer');
+                container.innerHTML = '';
+                
+                if (products.length === 0) {
+                    container.innerHTML = '<p style="text-align: center; color: #666;">No products found. Add some products to get started!</p>';
+                    return;
+                }
+                
+                products.forEach(product => {
+                    const productCard = document.createElement('div');
+                    productCard.className = 'product-card';
+                    productCard.innerHTML = `
+                        <img src="${product.imageURL}" alt="${product.name}" onerror="this.src='https://via.placeholder.com/300x200'">
+                        <h3>${product.name}</h3>
+                        <p>${product.description}</p>
+                        <p><strong>₦${product.price}</strong></p>
+                        <div class="product-actions">
+                            <button class="btn btn-edit" onclick="editProduct('${product.id}', '${product.name}', '${product.description}', ${product.price}, '${product.imageURL}')">Edit</button>
+                            <button class="btn btn-danger" onclick="deleteProduct('${product.id}')">Delete</button>
+                        </div>
+                    `;
+                    container.appendChild(productCard);
+                });
+            } catch (error) {
+                showMessage('dashboardMessage', 'Failed to load products: ' + error.message, 'error');
+            }
+        }
+
+        function editProduct(id, name, description, price, imageURL) {
+            document.getElementById('editProductId').value = id;
+            document.getElementById('editProductName').value = name;
+            document.getElementById('editProductDescription').value = description;
+            document.getElementById('editProductPrice').value = price;
+            document.getElementById('editModal').style.display = 'block';
+        }
+
+        function closeEditModal() {
+            document.getElementById('editModal').style.display = 'none';
+            document.getElementById('editProductForm').reset();
+        }
+
+        async function deleteProduct(id) {
+            if (confirm('Are you sure you want to delete this product?')) {
+                try {
+                    await FirebaseAPI.deleteProduct(id);
+                    loadProducts();
+                    showMessage('dashboardMessage', 'Product deleted successfully!', 'success');
+                } catch (error) {
+                    showMessage('dashboardMessage', 'Failed to delete product: ' + error.message, 'error');
+                }
+            }
+        }
+
+        function showMessage(containerId, message, type) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = `<div class="message ${type}">${message}</div>`;
+            setTimeout(() => container.innerHTML = '', 5000);
+        }
+
+        async function logout() {
+            try {
+                await FirebaseAPI.logoutAdmin();
+                localStorage.removeItem('demoAdmin');
+                currentUser = null;
+                showLogin();
+                showMessage('loginMessage', 'Logged out successfully', 'success');
+            } catch (error) {
+                console.error('Logout error:', error);
+            }
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('editModal');
+            if (event.target == modal) {
+                closeEditModal();
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Lorena Store</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #f5f5f5; }
+        .header { background: #e75480; color: white; padding: 1rem; display: flex; justify-content: space-between; align-items: center; }
+        .logout-btn { background: rgba(255,255,255,0.2); border: none; color: white; padding: 8px 16px; border-radius: 4px; cursor: pointer; }
+        .container { max-width: 1200px; margin: 2rem auto; padding: 0 1rem; }
+        .card { background: white; border-radius: 8px; padding: 1.5rem; margin-bottom: 2rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .form-group { margin-bottom: 1rem; }
+        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: bold; }
+        .form-group input, .form-group textarea { width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px; }
+        .btn { background: #e75480; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 4px; cursor: pointer; margin-right: 0.5rem; }
+        .btn:hover { background: #d63384; }
+        .btn-danger { background: #dc3545; }
+        .btn-danger:hover { background: #c82333; }
+        .btn-edit { background: #28a745; }
+        .btn-edit:hover { background: #218838; }
+        .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem; }
+        .product-card { border: 1px solid #ddd; border-radius: 8px; padding: 1rem; }
+        .product-card img { width: 100%; height: 200px; object-fit: cover; border-radius: 4px; margin-bottom: 1rem; }
+        .product-actions { display: flex; gap: 0.5rem; margin-top: 1rem; }
+        .login-form { max-width: 400px; margin: 5rem auto; background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .hidden { display: none; }
+        .message { padding: 1rem; border-radius: 4px; margin-bottom: 1rem; }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; }
+        .modal-content { background: white; margin: 5% auto; padding: 2rem; border-radius: 8px; max-width: 500px; }
+        .close { float: right; font-size: 28px; font-weight: bold; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <!-- Login Form -->
+    <div id="loginSection" class="login-form">
+        <h2>Admin Login</h2>
+        <div id="loginMessage"></div>
+        <form id="loginForm">
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="loginEmail" required>
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="loginPassword" required>
+            </div>
+            <button type="submit" class="btn">Login</button>
+        </form>
+        <p style="margin-top: 1rem; color: #666; font-size: 14px;">
+            Default: admin@lorenastore.com / admin123
+        </p>
+        <p style="margin-top: 0.5rem;"><a href="index.html">← Back to Store</a></p>
+    </div>
+
+    <!-- Admin Dashboard -->
+    <div id="dashboardSection" class="hidden">
+        <div class="header">
+            <h1>Admin Panel - Lorena Store</h1>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+
+        <div class="container">
+            <div id="dashboardMessage"></div>
+            
+            <div class="card">
+                <h2>Add New Product</h2>
+                <form id="productForm">
+                    <div class="form-group">
+                        <label>Product Name</label>
+                        <input type="text" id="productName" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea id="productDescription" rows="3" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Price (₦)</label>
+                        <input type="number" id="productPrice" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Image URL</label>
+                        <input type="url" id="productImageUrl" required>
+                    </div>
+                    <button type="submit" class="btn">Add Product</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <h2>Manage Products</h2>
+                <div id="productsContainer" class="products-grid"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Product Modal -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeEditModal()">&times;</span>
+            <h2>Edit Product</h2>
+            <form id="editProductForm">
+                <input type="hidden" id="editProductId">
+                <div class="form-group">
+                    <label>Product Name</label>
+                    <input type="text" id="editProductName" required>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="editProductDescription" rows="3" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Price (₦)</label>
+                    <input type="number" id="editProductPrice" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label>Image URL</label>
+                    <input type="url" id="editProductImageUrl" required>
+                </div>
+                <button type="submit" class="btn">Update Product</button>
+                <button type="button" class="btn btn-danger" onclick="closeEditModal()">Cancel</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'https://my-render-app.onrender.com';
+        let authToken = localStorage.getItem('adminToken');
+        
+        // Check if admin is logged in
+        if (authToken) {
+            showDashboard();
+        }
+
+        // Login form handler
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            try {
+                const response = await fetch(`${API_URL}/api/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    authToken = data.token;
+                    localStorage.setItem('adminToken', authToken);
+                    showMessage('loginMessage', 'Login successful!', 'success');
+                    setTimeout(showDashboard, 1000);
+                } else {
+                    showMessage('loginMessage', data.error || 'Login failed', 'error');
+                }
+            } catch (error) {
+                showMessage('loginMessage', 'Connection error. Please try again.', 'error');
+            }
+        });
+
+        // Add product form handler
+        document.getElementById('productForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const product = {
+                name: document.getElementById('productName').value,
+                description: document.getElementById('productDescription').value,
+                price: parseFloat(document.getElementById('productPrice').value),
+                image_url: document.getElementById('productImageUrl').value
+            };
+            
+            try {
+                const response = await fetch(`${API_URL}/api/products`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify(product)
+                });
+                
+                if (response.ok) {
+                    document.getElementById('productForm').reset();
+                    loadProducts();
+                    showMessage('dashboardMessage', 'Product added successfully!', 'success');
+                } else {
+                    const data = await response.json();
+                    showMessage('dashboardMessage', data.error || 'Failed to add product', 'error');
+                }
+            } catch (error) {
+                showMessage('dashboardMessage', 'Connection error. Please try again.', 'error');
+            }
+        });
+
+        // Edit product form handler
+        document.getElementById('editProductForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const id = document.getElementById('editProductId').value;
+            const product = {
+                name: document.getElementById('editProductName').value,
+                description: document.getElementById('editProductDescription').value,
+                price: parseFloat(document.getElementById('editProductPrice').value),
+                image_url: document.getElementById('editProductImageUrl').value
+            };
+            
+            try {
+                const response = await fetch(`${API_URL}/api/products/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify(product)
+                });
+                
+                if (response.ok) {
+                    closeEditModal();
+                    loadProducts();
+                    showMessage('dashboardMessage', 'Product updated successfully!', 'success');
+                } else {
+                    const data = await response.json();
+                    showMessage('dashboardMessage', data.error || 'Failed to update product', 'error');
+                }
+            } catch (error) {
+                showMessage('dashboardMessage', 'Connection error. Please try again.', 'error');
+            }
+        });
+
+        function showDashboard() {
+            document.getElementById('loginSection').classList.add('hidden');
+            document.getElementById('dashboardSection').classList.remove('hidden');
+            loadProducts();
+        }
+
+        async function loadProducts() {
+            try {
+                const response = await fetch(`${API_URL}/products`);
+                const products = await response.json();
+                const container = document.getElementById('productsContainer');
+                container.innerHTML = '';
+                
+                if (products.length === 0) {
+                    container.innerHTML = '<p style="text-align: center; color: #666;">No products found. Add some products to get started!</p>';
+                    return;
+                }
+                
+                products.forEach(product => {
+                    const productCard = document.createElement('div');
+                    productCard.className = 'product-card';
+                    productCard.innerHTML = `
+                        <img src="${product.image_url || 'https://via.placeholder.com/300x200'}" alt="${product.name}" onerror="this.src='https://via.placeholder.com/300x200'">
+                        <h3>${product.name}</h3>
+                        <p>${product.description}</p>
+                        <p><strong>₦${product.price}</strong></p>
+                        <div class="product-actions">
+                            <button class="btn btn-edit" onclick="editProduct(${product.id}, '${product.name}', '${product.description}', ${product.price}, '${product.image_url}')">Edit</button>
+                            <button class="btn btn-danger" onclick="deleteProduct(${product.id})">Delete</button>
+                        </div>
+                    `;
+                    container.appendChild(productCard);
+                });
+            } catch (error) {
+                showMessage('dashboardMessage', 'Failed to load products', 'error');
+            }
+        }
+
+        function editProduct(id, name, description, price, imageUrl) {
+            document.getElementById('editProductId').value = id;
+            document.getElementById('editProductName').value = name;
+            document.getElementById('editProductDescription').value = description;
+            document.getElementById('editProductPrice').value = price;
+            document.getElementById('editProductImageUrl').value = imageUrl;
+            document.getElementById('editModal').style.display = 'block';
+        }
+
+        function closeEditModal() {
+            document.getElementById('editModal').style.display = 'none';
+        }
+
+        async function deleteProduct(id) {
+            if (confirm('Are you sure you want to delete this product?')) {
+                try {
+                    const response = await fetch(`${API_URL}/api/products/${id}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Authorization': `Bearer ${authToken}`
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        loadProducts();
+                        showMessage('dashboardMessage', 'Product deleted successfully!', 'success');
+                    } else {
+                        const data = await response.json();
+                        showMessage('dashboardMessage', data.error || 'Failed to delete product', 'error');
+                    }
+                } catch (error) {
+                    showMessage('dashboardMessage', 'Connection error. Please try again.', 'error');
+                }
+            }
+        }
+
+        function showMessage(containerId, message, type) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = `<div class="message ${type}">${message}</div>`;
+            setTimeout(() => container.innerHTML = '', 5000);
+        }
+
+        function logout() {
+            localStorage.removeItem('adminToken');
+            authToken = null;
+            document.getElementById('loginSection').classList.remove('hidden');
+            document.getElementById('dashboardSection').classList.add('hidden');
+            showMessage('loginMessage', 'Logged out successfully', 'success');
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('editModal');
+            if (event.target == modal) {
+                closeEditModal();
+            }
+        }
+    </script>
+</body>
+</html>

@@ -143,27 +143,30 @@ function dynamicContentDetails(ob)
 
 
 
-// BACKEND CALLING
-
-let httpRequest = new XMLHttpRequest()
-{
-    httpRequest.onreadystatechange = function()
-    {
-        if(this.readyState === 4 && this.status == 200)
-        {
-            console.log('connected!!');
-            let contentDetails = JSON.parse(this.responseText)
-            {
-                console.log(contentDetails);
-                dynamicContentDetails(contentDetails)
-            }
+// FIREBASE API CALLING
+async function loadProductDetails() {
+    try {
+        const products = await FirebaseAPI.getProducts();
+        const product = products.find(p => String(p.id) === String(id));
+        
+        if (product) {
+            const productDetails = {
+                ...product,
+                preview: product.imageURL || 'https://via.placeholder.com/400x300',
+                photos: [product.imageURL || 'https://via.placeholder.com/400x300'],
+                brand: 'Lorena'
+            };
+            console.log('Product loaded:', productDetails);
+            dynamicContentDetails(productDetails);
+        } else {
+            console.log('Product not found');
+            document.getElementById('containerProduct').innerHTML = '<p style="text-align: center; padding: 2rem; color: #666;">Product not found.</p>';
         }
-        else
-        {
-            console.log('not connected!');
-        }
+    } catch (error) {
+        console.log('Failed to load product:', error);
+        document.getElementById('containerProduct').innerHTML = '<p style="text-align: center; padding: 2rem; color: #666;">Unable to load product details. Please try again later.</p>';
     }
 }
 
-httpRequest.open('GET', 'http://localhost:4000/api/products/'+id, true)
-httpRequest.send()  
+// Load product details
+loadProductDetails();  

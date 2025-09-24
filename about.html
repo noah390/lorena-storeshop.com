@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="css/presidential.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <link rel="stylesheet" href="css/mobile-utils.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>About Us - Lorena Store</title>
+    <link rel="icon" href="https://yt3.ggpht.com/a/AGF-l78km1YyNXmF0r3-0CycCA0HLA_i6zYn_8NZEg=s900-c-k-c0xffffffff-no-rj-mo" type="image/gif" sizes="16x16">
+    <script src="https://kit.fontawesome.com/4a3b1f73a2.js"></script>
+    <link href="https://fonts.googleapis.com/css?family=Lato&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+    <script src="js/jQuery3.4.1.js"></script>
+    
+    <style>
+        body { margin-top: 100px; font-family: 'Lato', sans-serif; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); min-height: 100vh; }
+        .about-section { padding: 4rem 0; background: linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(248,249,250,0.9) 100%); backdrop-filter: blur(10px); }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 2rem; }
+        .about-content { text-align: center; }
+        .about-title { font-size: 3rem; color: #e75480; margin-bottom: 2rem; font-family: 'Pacifico', cursive; }
+        .about-text { font-size: 1.2rem; line-height: 1.8; color: #666; margin-bottom: 2rem; max-width: 800px; margin-left: auto; margin-right: auto; }
+        .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; margin-top: 3rem; }
+        .feature-card { background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%); padding: 2rem; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); text-align: center; transition: transform 0.3s, box-shadow 0.3s; border: 1px solid rgba(255,255,255,0.2); }
+        .feature-card:hover { transform: translateY(-10px); box-shadow: 0 20px 40px rgba(0,0,0,0.15); }
+        .feature-icon { font-size: 3rem; color: #e75480; margin-bottom: 1rem; }
+        .feature-title { font-size: 1.5rem; font-weight: bold; margin-bottom: 1rem; color: #333; }
+        .feature-desc { color: #666; line-height: 1.6; }
+    </style>
+</head>
+
+<body>
+    <script src="js/auth-guard.js"></script>
+    <!-- HEADER -->
+    <div id="1"></div>
+    
+    <!-- About Section -->
+    <section class="about-section">
+        <div class="container">
+            <div class="about-content">
+                <h1 class="about-title">About Lorena Store</h1>
+                <p class="about-text">
+                    Welcome to Lorena Store, your premier destination for fashion and accessories. We are passionate about bringing you the latest trends, quality products, and exceptional customer service. Our carefully curated collection features stylish clothing, elegant accessories, and unique pieces that help you express your personal style.
+                </p>
+                <p class="about-text">
+                    Founded with a vision to make fashion accessible to everyone, we pride ourselves on offering high-quality products at affordable prices. Whether you're looking for everyday essentials or special occasion pieces, Lorena Store has something perfect for you.
+                </p>
+                
+                <div class="features">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-gem"></i>
+                        </div>
+                        <h3 class="feature-title">Quality Products</h3>
+                        <p class="feature-desc">We carefully select each item to ensure the highest quality and style for our customers.</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-shipping-fast"></i>
+                        </div>
+                        <h3 class="feature-title">Fast Delivery</h3>
+                        <p class="feature-desc">Quick and reliable delivery service to get your orders to you as soon as possible.</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-heart"></i>
+                        </div>
+                        <h3 class="feature-title">Customer Care</h3>
+                        <p class="feature-desc">Dedicated customer support team ready to help you with any questions or concerns.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- FOOTER -->
+    <div id="4"></div>
+
+    <script>
+        function loadContent(url, elementId) {
+            const req = new XMLHttpRequest();
+            req.open("GET", url, false);
+            req.send(null);
+            document.getElementById(elementId).innerHTML = req.responseText;
+        }
+        
+        loadContent("header.html", 1);
+        loadContent("footer.html", 4);
+        
+        function scrollToProducts() {
+            window.location.href = 'index.html#products';
+        }
+        
+        // Handle hash navigation
+        window.addEventListener('load', function() {
+            if (window.location.hash === '#products') {
+                setTimeout(() => scrollToProducts(), 500);
+            }
+        });
+    </script>
+</body>
+</html>

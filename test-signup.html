@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Signup - Lorena Store</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
+        .container { max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; }
+        .btn { padding: 10px 20px; margin: 10px; background: #e75480; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        .result { margin: 20px 0; padding: 15px; border-radius: 5px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Test Firebase Integration</h1>
+        
+        <div>
+            <h3>Test Email Signup</h3>
+            <input type="text" id="testName" placeholder="Full Name" value="Test User">
+            <input type="email" id="testEmail" placeholder="Email" value="test@example.com">
+            <input type="password" id="testPassword" placeholder="Password" value="123456">
+            <button class="btn" onclick="testEmailSignup()">Test Email Signup</button>
+        </div>
+        
+        <div>
+            <h3>Test Google Signup</h3>
+            <button class="btn" onclick="testGoogleSignup()">Test Google Signup</button>
+        </div>
+        
+        <div>
+            <h3>Test Admin Login</h3>
+            <input type="text" id="adminUser" placeholder="Username" value="Lorena">
+            <input type="password" id="adminPass" placeholder="Password" value="Iloveyoudear">
+            <button class="btn" onclick="testAdminLogin()">Test Admin Login</button>
+        </div>
+        
+        <div>
+            <h3>Test Product Management</h3>
+            <button class="btn" onclick="testAddProduct()">Test Add Product</button>
+            <button class="btn" onclick="testLoadProducts()">Test Load Products</button>
+        </div>
+        
+        <div id="results"></div>
+    </div>
+
+    <!-- Firebase Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-storage-compat.js"></script>
+    <script src="firebase-config.js"></script>
+
+    <script>
+        function showResult(message, type = 'success') {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `result ${type}`;
+            div.textContent = message;
+            results.appendChild(div);
+        }
+
+        async function testEmailSignup() {
+            try {
+                const { auth, db } = window.firebaseServices;
+                const name = document.getElementById('testName').value;
+                const email = document.getElementById('testEmail').value;
+                const password = document.getElementById('testPassword').value;
+
+                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                const user = userCredential.user;
+
+                await user.updateProfile({ displayName: name });
+
+                await db.collection('users').doc(user.uid).set({
+                    name: name,
+                    email: email,
+                    photoURL: '',
+                    provider: 'email',
+                    createdAt: new Date(),
+                    phone: ''
+                });
+
+                showResult('✅ Email signup successful! User created in Firebase Auth and Firestore.');
+            } catch (error) {
+                showResult('❌ Email signup failed: ' + error.message, 'error');
+            }
+        }
+
+        async function testGoogleSignup() {
+            try {
+                const { auth, googleProvider, db } = window.firebaseServices;
+                const result = await auth.signInWithPopup(googleProvider);
+                const user = result.user;
+
+                await db.collection('users').doc(user.uid).set({
+                    name: user.displayName,
+                    email: user.email,
+                    photoURL: user.photoURL,
+                    provider: 'google',
+                    createdAt: new Date(),
+                    phone: ''
+                });
+
+                showResult('✅ Google signup successful! User created in Firebase Auth and Firestore.');
+            } catch (error) {
+                showResult('❌ Google signup failed: ' + error.message, 'error');
+            }
+        }
+
+        function testAdminLogin() {
+            try {
+                const { adminCredentials } = window.firebaseServices;
+                const username = document.getElementById('adminUser').value;
+                const password = document.getElementById('adminPass').value;
+
+                if (adminCredentials[username] && adminCredentials[username] === password) {
+                    localStorage.setItem('adminUser', JSON.stringify({ username, loginTime: Date.now() }));
+                    showResult('✅ Admin login successful! Credentials verified.');
+                } else {
+                    throw new Error('Invalid admin credentials');
+                }
+            } catch (error) {
+                showResult('❌ Admin login failed: ' + error.message, 'error');
+            }
+        }
+
+        async function testAddProduct() {
+            try {
+                const { db } = window.firebaseServices;
+                const testProduct = {
+                    name: 'Test Product',
+                    description: 'This is a test product',
+                    price: 5000,
+                    imageURL: 'https://via.placeholder.com/300x300/e75480/ffffff?text=Test+Product',
+                    createdAt: new Date()
+                };
+
+                const docRef = await db.collection('products').add(testProduct);
+                showResult('✅ Product added successfully! ID: ' + docRef.id);
+            } catch (error) {
+                showResult('❌ Add product failed: ' + error.message, 'error');
+            }
+        }
+
+        async function testLoadProducts() {
+            try {
+                const { db } = window.firebaseServices;
+                const snapshot = await db.collection('products').get();
+                const products = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                
+                showResult(`✅ Products loaded successfully! Found ${products.length} products.`);
+                console.log('Products:', products);
+            } catch (error) {
+                showResult('❌ Load products failed: ' + error.message, 'error');
+            }
+        }
+
+        // Wait for Firebase to load
+        function waitForFirebase() {
+            if (window.firebaseServices) {
+                showResult('✅ Firebase services loaded successfully!');
+            } else {
+                setTimeout(waitForFirebase, 100);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', waitForFirebase);
+    </script>
+</body>
+</html>

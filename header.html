@@ -28,10 +28,25 @@
                 </div>
                     <!-- COLLECTIONS ON WEBSITE -->
                     <div id="collection">
-                        <div><a href="index.html"> HOME </a></div>
-                        <div><a href="clothing.html"> CLOTHING </a></div>
-                        <div><a href="accessories.html"> ACCESSORIES </a></div>
-                        <div><a href="contact.html"> CONTACT </a></div>
+                        <div><a href="index.html">HOME</a></div>
+                        <div><a href="index.html#products">PRODUCTS</a></div>
+                        <div><a href="about.html">ABOUT US</a></div>
+                        <div><a href="contact.html">CONTACT US</a></div>
+                        <div><a href="admin.html" style="color: #666; font-size: 12px;">ADMIN</a></div>
+                    </div>
+                    
+                    <!-- MOBILE MENU TOGGLE -->
+                    <div id="mobileMenuToggle" style="display: none;">
+                        <i class="fas fa-bars" id="menuIcon"></i>
+                    </div>
+                    
+                    <!-- MOBILE MENU -->
+                    <div id="mobileMenu" style="display: none;">
+                        <div class="mobile-menu-item"><a href="index.html">HOME</a></div>
+                        <div class="mobile-menu-item"><a href="index.html#products">PRODUCTS</a></div>
+                        <div class="mobile-menu-item"><a href="about.html">ABOUT US</a></div>
+                        <div class="mobile-menu-item"><a href="contact.html">CONTACT US</a></div>
+                        <div class="mobile-menu-item"><a href="admin.html">ADMIN</a></div>
                     </div>
                     <!-- SEARCH SECTION -->
                     <div id="search">
@@ -40,8 +55,11 @@
                     </div>
                     <!-- USER SECTION (CART AND USER ICON) -->
                     <div id="user">
+                        <a href="https://wa.me/2349050120553" title="WhatsApp" target="_blank"> <i class="fab fa-whatsapp" style="font-size: 1.8em; color: #25d366; margin-right: 15px;"></i></a>
+                        <a href="tel:+2349050120553" title="Call Us"> <i class="fas fa-phone" style="font-size: 1.5em; color: #e75480; margin-right: 15px;"></i></a>
+                        <a href="mailto:spanishfrenchexpress@gmail.com" title="Email Us"> <i class="fas fa-envelope" style="font-size: 1.5em; color: #007bff; margin-right: 15px;"></i></a>
                         <a href="cart.html" title="Shopping Cart"> <i class="fas fa-shopping-cart addedToCart"><div id="badge"> 0 </div></i></a>
-                        <a href="profile.html" title="User Profile" id="userProfileLink"> <i class="fas fa-user-circle userIcon"></i> </a>
+                        <a href="login.html" title="Login / Register" id="userProfileLink"> <i class="fas fa-user-circle userIcon"></i> </a>
                     </div>
                     <script>
                         // Update cart badge and user link
@@ -52,14 +70,59 @@
                             const badge = document.getElementById('badge');
                             if (badge) badge.textContent = totalItems;
                             
-                            // Update user profile link
-                            const currentUser = localStorage.getItem('currentUser');
+                            // Update user profile link based on authentication
                             const userLink = document.getElementById('userProfileLink');
-                            if (currentUser) {
-                                userLink.title = 'My Profile';
-                                userLink.style.color = '#e75480';
+                            
+                            // Check Firebase auth state
+                            if (window.firebaseServices && window.firebaseServices.auth) {
+                                window.firebaseServices.auth.onAuthStateChanged((user) => {
+                                    if (user) {
+                                        userLink.href = 'profile.html';
+                                        userLink.title = 'My Profile';
+                                        userLink.style.color = '#e75480';
+                                    } else {
+                                        userLink.href = 'login.html';
+                                        userLink.title = 'Login / Register';
+                                        userLink.style.color = '#666';
+                                    }
+                                });
                             } else {
-                                userLink.title = 'Login / Register';
+                                // Fallback to localStorage check
+                                const currentUser = localStorage.getItem('currentUser');
+                                if (currentUser) {
+                                    userLink.href = 'profile.html';
+                                    userLink.title = 'My Profile';
+                                    userLink.style.color = '#e75480';
+                                } else {
+                                    userLink.href = 'login.html';
+                                    userLink.title = 'Login / Register';
+                                    userLink.style.color = '#666';
+                                }
+                            }
+                            
+                            // Mobile menu functionality
+                            const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+                            const mobileMenu = document.getElementById('mobileMenu');
+                            const menuIcon = document.getElementById('menuIcon');
+                            
+                            if (mobileMenuToggle && mobileMenu) {
+                                mobileMenuToggle.addEventListener('click', function() {
+                                    if (mobileMenu.style.display === 'none' || !mobileMenu.style.display) {
+                                        mobileMenu.style.display = 'block';
+                                        menuIcon.className = 'fas fa-times';
+                                    } else {
+                                        mobileMenu.style.display = 'none';
+                                        menuIcon.className = 'fas fa-bars';
+                                    }
+                                });
+                                
+                                // Close menu when clicking outside
+                                document.addEventListener('click', function(e) {
+                                    if (!mobileMenuToggle.contains(e.target) && !mobileMenu.contains(e.target)) {
+                                        mobileMenu.style.display = 'none';
+                                        menuIcon.className = 'fas fa-bars';
+                                    }
+                                });
                             }
                         });
                     </script>

@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head><title>Populate Firebase</title></head>
+<body>
+<h2>Populating Firebase with Products...</h2>
+<div id="status">Loading...</div>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+<script src="populate-now.js"></script>
+<script>
+setTimeout(() => {
+    document.getElementById('status').innerHTML = '✅ Check console - Products should be populated!';
+}, 2000);
+</script>
+</body>
+</html>

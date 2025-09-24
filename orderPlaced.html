@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title> ORDER PLACED | E-COMMERCE WEBSITE BY EDYODA </title>
+    <title> Order Placed - Lorena Store </title>
     <!-- favicon -->
     <link rel="icon" href="https://yt3.ggpht.com/a/AGF-l78km1YyNXmF0r3-0CycCA0HLA_i6zYn_8NZEg=s900-c-k-c0xffffffff-no-rj-mo" type="image/gif" sizes="16x16">
     <!-- fontawesome -->
@@ -14,7 +14,11 @@
 
     <link rel="stylesheet" href="css/orderPlaced.css">
 </head>
-<body>  
+<body>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="js/simple-users.js"></script>
+    <script src="js/auth.js"></script>  
     <!-- HEADER -->
     <div id="1"></div>
     <script>
@@ -34,7 +38,7 @@
         
         <div id="aboutCheck">
             <h1> 🎉 Order Placed Successfully! </h1>
-            <p> Thank you for your patronage! We appreciate your business. </p>
+            <p id="thankYouMessage"> Thank you for your patronage! We appreciate your business. </p>
             <div id="orderDetails" style="background: #f9f9f9; padding: 20px; border-radius: 10px; margin: 20px 0; text-align: left;">
                 <!-- Order details will be loaded here -->
             </div>
@@ -63,34 +67,75 @@
         </script>
 </body>
 <script>
-// Display order details
+// Display order details and personalized thank you message
 const lastOrder = JSON.parse(localStorage.getItem('lastOrder') || '{}');
+const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+
+// Personalize thank you message
+if(currentUser.name) {
+    document.getElementById('thankYouMessage').innerHTML = `Thank you for your patronage, <strong>${currentUser.name}</strong>! We appreciate your business and trust in Lorena Store.`;
+}
+
 if(lastOrder && lastOrder.orderNumber) {
     const orderDetailsDiv = document.getElementById('orderDetails');
     let itemsList = '';
+    let totalAmount = 0;
     
-    if(lastOrder.items && Array.isArray(lastOrder.items)) {
-        itemsList = lastOrder.items.map(item => 
-            `<div style="display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #eee;">
-                <span>${item.name} × ${item.quantity}</span>
-                <span>₦${item.total.toLocaleString()}</span>
-            </div>`
-        ).join('');
+    // Calculate items and total from cart data
+    if(lastOrder.items) {
+        // Get products from Firebase
+        firebase.database().ref('products').once('value')
+            .then(snapshot => {
+                const products = snapshot.val() || [];
+                Object.keys(lastOrder.items).forEach(productId => {
+                    const product = products.find(p => String(p.id) === String(productId));
+                    if(product) {
+                        const quantity = lastOrder.items[productId];
+                        const itemTotal = product.price * quantity;
+                        totalAmount += itemTotal;
+                        itemsList += `<div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee;">
+                            <span>${product.name} × ${quantity}</span>
+                            <span>₦${itemTotal.toLocaleString()}</span>
+                        </div>`;
+                    }
+                });
+                
+                orderDetailsDiv.innerHTML = `
+                    <h3 style="color: #e75480; margin-bottom: 15px;"><i class="fas fa-receipt"></i> Order Summary</h3>
+                    <p><strong>Order Number:</strong> ${lastOrder.orderNumber}</p>
+                    <p><strong>Customer:</strong> ${lastOrder.customer ? lastOrder.customer.name : 'N/A'}</p>
+                    <p><strong>Email:</strong> ${lastOrder.customer ? lastOrder.customer.email : 'N/A'}</p>
+                    <p><strong>Phone:</strong> ${lastOrder.customer ? lastOrder.customer.phone : 'N/A'}</p>
+                    <p><strong>Delivery Address:</strong> ${lastOrder.customer ? lastOrder.customer.address + ', ' + lastOrder.customer.city : 'N/A'}</p>
+                    <p><strong>Date:</strong> ${new Date(lastOrder.orderDate).toLocaleString()}</p>
+                    <div style="margin: 15px 0;">
+                        <h4>Items Ordered:</h4>
+                        ${itemsList}
+                    </div>
+                    <div style="text-align: right; font-size: 1.2em; font-weight: bold; color: #e75480; margin-top: 15px; padding-top: 15px; border-top: 2px solid #e75480;">
+                        Total: ₦${totalAmount.toLocaleString()}
+                    </div>
+                    <div style="background: #e8f5e8; padding: 15px; border-radius: 8px; margin-top: 20px; border-left: 4px solid #28a745;">
+                        <p style="margin: 0; color: #155724;"><i class="fas fa-info-circle"></i> <strong>What's Next?</strong></p>
+                        <p style="margin: 5px 0 0 0; color: #155724;">Our team will contact you within 24 hours at ${lastOrder.customer ? lastOrder.customer.phone : 'your provided number'} to confirm delivery details and arrange payment.</p>
+                    </div>
+                `;
+            })
+            .catch(() => {
+                orderDetailsDiv.innerHTML = `
+                    <h3 style="color: #e75480; margin-bottom: 15px;"><i class="fas fa-receipt"></i> Order Summary</h3>
+                    <p><strong>Order Number:</strong> ${lastOrder.orderNumber}</p>
+                    <p><strong>Customer:</strong> ${lastOrder.customer ? lastOrder.customer.name : 'N/A'}</p>
+                    <p><strong>Date:</strong> ${new Date(lastOrder.orderDate).toLocaleString()}</p>
+                    <p style="color: #666;">Order details will be sent to your email shortly.</p>
+                `;
+            });
     }
-    
-    orderDetailsDiv.innerHTML = `
-        <h3 style="color: #e75480; margin-bottom: 15px;"><i class="fas fa-receipt"></i> Order Summary</h3>
-        <p><strong>Order Number:</strong> ${lastOrder.orderNumber}</p>
-        <p><strong>Customer:</strong> ${lastOrder.customer ? lastOrder.customer.name : 'N/A'}</p>
-        <p><strong>Date:</strong> ${new Date(lastOrder.orderDate).toLocaleString()}</p>
-        <div style="margin: 15px 0;">
-            <h4>Items Ordered:</h4>
-            ${itemsList}
-        </div>
-        <div style="text-align: right; font-size: 1.2em; font-weight: bold; color: #e75480; margin-top: 15px; padding-top: 15px; border-top: 2px solid #e75480;">
-            Total: ₦${lastOrder.totalAmount ? lastOrder.totalAmount.toLocaleString() : 'N/A'}
-        </div>
-    `;
+} else {
+    // If no order found, redirect to home
+    setTimeout(() => {
+        window.location.href = 'index.html';
+    }, 3000);
 }
 </script>
 </html>

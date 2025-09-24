@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Lorena Store</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="js/firebase-products.js"></script>
+    <script src="js/simple-users.js"></script>
+    <script src="js/populate-firebase.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #f5f5f5; }
+        .header { background: #e75480; color: white; padding: 1rem; display: flex; justify-content: space-between; align-items: center; }
+        .logout-btn { background: rgba(255,255,255,0.2); border: none; color: white; padding: 8px 16px; border-radius: 4px; cursor: pointer; }
+        .container { max-width: 1200px; margin: 2rem auto; padding: 0 1rem; }
+        .card { background: white; border-radius: 8px; padding: 1.5rem; margin-bottom: 2rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .form-group { margin-bottom: 1rem; }
+        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: bold; }
+        .form-group input, .form-group textarea { width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px; }
+        .btn { background: #e75480; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 4px; cursor: pointer; }
+        .btn:hover { background: #d63384; }
+        .btn-danger { background: #dc3545; }
+        .btn-danger:hover { background: #c82333; }
+        .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem; }
+        .product-card { border: 1px solid #ddd; border-radius: 8px; padding: 1rem; }
+        .product-card img { width: 100%; height: 200px; object-fit: cover; border-radius: 4px; margin-bottom: 1rem; }
+        .product-actions { display: flex; gap: 0.5rem; margin-top: 1rem; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Admin Dashboard</h1>
+        <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+
+    <div class="container">
+        <div class="card">
+            <h2>Add New Product</h2>
+            <form id="productForm">
+                <div class="form-group">
+                    <label>Product Name</label>
+                    <input type="text" id="productName" required>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="productDescription" rows="3" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Price (₦)</label>
+                    <input type="number" id="productPrice" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label>Product Image</label>
+                    <input type="file" id="productImage" accept="image/*">
+                    <small style="color: #666;">Optional - Random fashion image will be used if not provided</small>
+                </div>
+                <div class="form-group">
+                    <label>Category</label>
+                    <select id="productCategory" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px;">
+                        <option value="clothing">Clothing</option>
+                        <option value="accessories">Accessories</option>
+                        <option value="jewelry">Jewelry</option>
+                        <option value="watches">Watches</option>
+                        <option value="bags">Bags</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn">Add Product</button>
+            </form>
+        </div>
+
+        <div class="card">
+            <h2>Dashboard Overview</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+                <div style="background: #e75480; color: white; padding: 1.5rem; border-radius: 8px; text-align: center;">
+                    <h3 id="totalOrders">0</h3>
+                    <p>Total Orders</p>
+                </div>
+                <div style="background: #28a745; color: white; padding: 1.5rem; border-radius: 8px; text-align: center;">
+                    <h3 id="totalUsers">0</h3>
+                    <p>Registered Users</p>
+                </div>
+                <div style="background: #17a2b8; color: white; padding: 1.5rem; border-radius: 8px; text-align: center;">
+                    <h3 id="totalRevenue">₦0</h3>
+                    <p>Total Revenue</p>
+                </div>
+                <div style="background: #ffc107; color: black; padding: 1.5rem; border-radius: 8px; text-align: center;">
+                    <h3 id="totalProducts">0</h3>
+                    <p>Products</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Recent Orders</h2>
+            <div style="overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="background: #f8f9fa;">
+                            <th style="padding: 12px; text-align: left; border-bottom: 1px solid #ddd;">Order #</th>
+                            <th style="padding: 12px; text-align: left; border-bottom: 1px solid #ddd;">Customer</th>
+                            <th style="padding: 12px; text-align: left; border-bottom: 1px solid #ddd;">Email</th>
+                            <th style="padding: 12px; text-align: left; border-bottom: 1px solid #ddd;">Phone</th>
+                            <th style="padding: 12px; text-align: left; border-bottom: 1px solid #ddd;">Address</th>
+                            <th style="padding: 12px; text-align: left; border-bottom: 1px solid #ddd;">Items</th>
+                            <th style="padding: 12px; text-align: left; border-bottom: 1px solid #ddd;">Total</th>
+                            <th style="padding: 12px; text-align: left; border-bottom: 1px solid #ddd;">Date & Time</th>
+                            <th style="padding: 12px; text-align: left; border-bottom: 1px solid #ddd;">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ordersTable">
+                        <tr>
+                            <td colspan="9" style="padding: 20px; text-align: center; color: #666;">No orders found</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Registered Users</h2>
+            <div style="overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="background: #f8f9fa;">
+                            <th style="padding: 12px; text-align: left; border-bottom: 1px solid #ddd;">Name</th>
+                            <th style="padding: 12px; text-align: left; border-bottom: 1px solid #ddd;">Email/Phone</th>
+                            <th style="padding: 12px; text-align: left; border-bottom: 1px solid #ddd;">Registration Date</th>
+                            <th style="padding: 12px; text-align: left; border-bottom: 1px solid #ddd;">Orders</th>
+                            <th style="padding: 12px; text-align: left; border-bottom: 1px solid #ddd;">Last Login</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usersTable">
+                        <tr>
+                            <td colspan="5" style="padding: 20px; text-align: center; color: #666;">No users found</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Manage Products</h2>
+            <div id="productsContainer" class="products-grid"></div>
+        </div>
+    </div>
+
+    <script>
+        // Check admin authentication
+        const adminUser = localStorage.getItem('isAdmin');
+        if (!adminUser) {
+            window.location.href = 'admin.html';
+        }
+
+        // Load all data on page load
+        loadDashboardData();
+        loadProducts();
+        loadOrders();
+        loadUsers();
+        
+        // Auto-populate Firebase if empty
+        checkAndPopulate();
+        
+        // Auto-refresh orders every 30 seconds
+        setInterval(loadOrders, 30000);
+
+        function loadDashboardData() {
+            // Load orders from localStorage
+            const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+            const users = JSON.parse(localStorage.getItem('registeredUsers') || '{}');
+            
+            // Calculate totals
+            const totalOrders = orders.length;
+            const totalUsers = Object.keys(users).length;
+            const totalRevenue = orders.reduce((sum, order) => {
+                const orderTotal = Object.keys(order.items || {}).reduce((itemSum, productId) => {
+                    const quantity = order.items[productId];
+                    // You'd need product price here - for now using estimated average
+                    return itemSum + (quantity * 5000); // Estimated average price
+                }, 0);
+                return sum + orderTotal;
+            }, 0);
+            
+            // Update dashboard cards
+            document.getElementById('totalOrders').textContent = totalOrders;
+            document.getElementById('totalUsers').textContent = totalUsers;
+            document.getElementById('totalRevenue').textContent = '₦' + totalRevenue.toLocaleString();
+            
+            // Load products count from Firebase
+            FirebaseProductsAPI.getProducts()
+                .then(products => {
+                    document.getElementById('totalProducts').textContent = products.length;
+                })
+                .catch(() => {
+                    document.getElementById('totalProducts').textContent = '0';
+                });
+        }
+
+        async function loadOrders() {
+            try {
+                // Load from Firebase first
+                const snapshot = await firebase.database().ref('orders').once('value');
+                const firebaseOrders = snapshot.val() || {};
+                
+                // Merge with localStorage orders
+                const localOrders = JSON.parse(localStorage.getItem('orders') || '[]');
+                const allOrders = [...localOrders, ...Object.values(firebaseOrders)];
+                
+                const ordersTable = document.getElementById('ordersTable');
+                
+                if (allOrders.length === 0) {
+                    ordersTable.innerHTML = '<tr><td colspan="8" style="padding: 20px; text-align: center; color: #666;">No orders found</td></tr>';
+                    return;
+                }
+                
+                ordersTable.innerHTML = '';
+                allOrders.slice(-20).reverse().forEach(order => {
+                    const row = document.createElement('tr');
+                    const itemCount = Object.values(order.items || {}).reduce((a, b) => a + b, 0);
+                    const orderDate = new Date(order.orderDate || Date.now()).toLocaleDateString();
+                    const orderTime = new Date(order.orderDate || Date.now()).toLocaleTimeString();
+                    
+                    row.innerHTML = `
+                        <td style="padding: 12px; border-bottom: 1px solid #eee;">${order.orderNumber || 'N/A'}</td>
+                        <td style="padding: 12px; border-bottom: 1px solid #eee;">${order.customer?.name || 'N/A'}</td>
+                        <td style="padding: 12px; border-bottom: 1px solid #eee;">${order.customer?.email || 'N/A'}</td>
+                        <td style="padding: 12px; border-bottom: 1px solid #eee;">${order.customer?.phone || 'N/A'}</td>
+                        <td style="padding: 12px; border-bottom: 1px solid #eee;">${order.customer?.address || 'N/A'}</td>
+                        <td style="padding: 12px; border-bottom: 1px solid #eee;">${itemCount} items</td>
+                        <td style="padding: 12px; border-bottom: 1px solid #eee;">₦${(order.total || itemCount * 5000).toLocaleString()}</td>
+                        <td style="padding: 12px; border-bottom: 1px solid #eee;">${orderDate} ${orderTime}</td>
+                        <td style="padding: 12px; border-bottom: 1px solid #eee;">
+                            <span style="background: #28a745; color: white; padding: 0.3rem 0.6rem; border-radius: 12px; font-size: 0.8rem;">${order.status || 'Pending'}</span>
+                        </td>
+                    `;
+                    ordersTable.appendChild(row);
+                });
+                
+                // Update dashboard stats
+                document.getElementById('totalOrders').textContent = allOrders.length;
+                const totalRevenue = allOrders.reduce((sum, order) => sum + (order.total || 0), 0);
+                document.getElementById('totalRevenue').textContent = '₦' + totalRevenue.toLocaleString();
+            } catch (error) {
+                console.error('Failed to load orders:', error);
+                // Fallback to localStorage only
+                const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+                const ordersTable = document.getElementById('ordersTable');
+                
+                if (orders.length === 0) {
+                    ordersTable.innerHTML = '<tr><td colspan="8" style="padding: 20px; text-align: center; color: #666;">No orders found</td></tr>';
+                    return;
+                }
+                
+                ordersTable.innerHTML = '';
+                orders.slice(-20).reverse().forEach(order => {
+                    const row = document.createElement('tr');
+                    const itemCount = Object.values(order.items || {}).reduce((a, b) => a + b, 0);
+                    const orderDate = new Date(order.orderDate || Date.now()).toLocaleDateString();
+                    
+                    row.innerHTML = `
+                        <td style="padding: 12px; border-bottom: 1px solid #eee;">${order.orderNumber || 'N/A'}</td>
+                        <td style="padding: 12px; border-bottom: 1px solid #eee;">${order.customer?.name || 'N/A'}</td>
+                        <td style="padding: 12px; border-bottom: 1px solid #eee;">${order.customer?.email || 'N/A'}</td>
+                        <td style="padding: 12px; border-bottom: 1px solid #eee;">${order.customer?.phone || 'N/A'}</td>
+                        <td style="padding: 12px; border-bottom: 1px solid #eee;">${order.customer?.address || 'N/A'}</td>
+                        <td style="padding: 12px; border-bottom: 1px solid #eee;">${itemCount} items</td>
+                        <td style="padding: 12px; border-bottom: 1px solid #eee;">₦${(order.total || itemCount * 5000).toLocaleString()}</td>
+                        <td style="padding: 12px; border-bottom: 1px solid #eee;">${orderDate}</td>
+                        <td style="padding: 12px; border-bottom: 1px solid #eee;">
+                            <span style="background: #28a745; color: white; padding: 0.3rem 0.6rem; border-radius: 12px; font-size: 0.8rem;">Pending</span>
+                        </td>
+                    `;
+                    ordersTable.appendChild(row);
+                });
+            }
+        }
+
+        async function loadUsers() {
+            try {
+                // Load users from Firebase
+                const firebaseUsers = await SimpleUsersAPI.getAllUsers();
+                const usersTable = document.getElementById('usersTable');
+                
+                if (firebaseUsers.length === 0) {
+                    usersTable.innerHTML = '<tr><td colspan="4" style="padding: 20px; text-align: center; color: #666;">No users found</td></tr>';
+                    return;
+                }
+                
+                usersTable.innerHTML = '';
+                firebaseUsers.forEach(userData => {
+                    const row = document.createElement('tr');
+                    const registrationDate = userData.createdAt ? new Date(userData.createdAt).toLocaleDateString() : 'N/A';
+                    const lastLogin = userData.lastLogin ? new Date(userData.lastLogin).toLocaleDateString() : 'Never';
+                    
+                    // Count orders for this user
+                    const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+                    const userOrders = orders.filter(order => order.userId === userData.id).length;
+                    
+                    row.innerHTML = `
+                        <td style="padding: 12px; border-bottom: 1px solid #eee;">${userData.name || 'N/A'}</td>
+                        <td style="padding: 12px; border-bottom: 1px solid #eee;">${userData.email || userData.phone || userData.id}</td>
+                        <td style="padding: 12px; border-bottom: 1px solid #eee;">${registrationDate}</td>
+                        <td style="padding: 12px; border-bottom: 1px solid #eee;">${userOrders} orders</td>
+                        <td style="padding: 12px; border-bottom: 1px solid #eee;">${lastLogin}</td>
+                    `;
+                    usersTable.appendChild(row);
+                });
+                
+                // Update total users count
+                document.getElementById('totalUsers').textContent = firebaseUsers.length;
+            } catch (error) {
+                console.error('Failed to load users from Firebase:', error);
+                // Fallback to localStorage
+                const users = JSON.parse(localStorage.getItem('registeredUsers') || '{}');
+                const usersTable = document.getElementById('usersTable');
+                
+                if (Object.keys(users).length === 0) {
+                    usersTable.innerHTML = '<tr><td colspan="4" style="padding: 20px; text-align: center; color: #666;">No users found</td></tr>';
+                    return;
+                }
+                
+                usersTable.innerHTML = '';
+                Object.entries(users).forEach(([identifier, userData]) => {
+                    const row = document.createElement('tr');
+                    const registrationDate = userData.createdAt ? new Date(userData.createdAt).toLocaleDateString() : 'N/A';
+                    
+                    row.innerHTML = `
+                        <td style="padding: 12px; border-bottom: 1px solid #eee;">${userData.name || 'N/A'}</td>
+                        <td style="padding: 12px; border-bottom: 1px solid #eee;">${identifier}</td>
+                        <td style="padding: 12px; border-bottom: 1px solid #eee;">${registrationDate}</td>
+                        <td style="padding: 12px; border-bottom: 1px solid #eee;">0 orders</td>
+                        <td style="padding: 12px; border-bottom: 1px solid #eee;">N/A</td>
+                    `;
+                    usersTable.appendChild(row);
+                });
+            }
+        }
+
+        let allProducts = [];
+
+        async function loadProducts() {
+            try {
+                const products = await FirebaseProductsAPI.getProducts();
+                allProducts = products;
+                displayProducts(products);
+                document.getElementById('totalProducts').textContent = products.length;
+            } catch (error) {
+                console.error('Failed to load products from Firebase:', error);
+                document.getElementById('productsContainer').innerHTML = '<p style="text-align: center; color: #dc3545;">Error loading products. Please check connection.</p>';
+            }
+        }
+
+        function displayProducts(products) {
+            const container = document.getElementById('productsContainer');
+            container.innerHTML = '';
+            
+            if (products.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #666;">No products found.</p>';
+                return;
+            }
+            
+            products.forEach(product => {
+                const productCard = document.createElement('div');
+                productCard.className = 'product-card';
+                productCard.innerHTML = `
+                    <img src="${product.image || 'https://via.placeholder.com/200'}" alt="${product.name}" onerror="this.src='https://via.placeholder.com/200'">
+                    <h3>${product.name}</h3>
+                    <p><strong>₦${product.price?.toLocaleString()}</strong></p>
+                    <p><small>Category: ${product.category || 'N/A'}</small></p>
+                    <div class="product-actions">
+                        <button class="btn" onclick="editProduct(${product.id})">Edit</button>
+                        <button class="btn btn-danger" onclick="deleteProduct(${product.id})">Delete</button>
+                    </div>
+                `;
+                container.appendChild(productCard);
+            });
+        }
+
+        // Add/Edit product form handler
+        document.getElementById('productForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const name = document.getElementById('productName').value;
+            const description = document.getElementById('productDescription').value;
+            const price = parseFloat(document.getElementById('productPrice').value);
+            const category = document.getElementById('productCategory').value;
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const editId = submitBtn.dataset.editId;
+            
+            try {
+                const fashionImages = [
+                    'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400',
+                    'https://images.unsplash.com/photo-1445205170230-053b83016050?w=400',
+                    'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=400',
+                    'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=400'
+                ];
+                
+                if (editId) {
+                    // Update existing product
+                    const productIndex = allProducts.findIndex(p => p.id === parseInt(editId));
+                    if (productIndex !== -1) {
+                        allProducts[productIndex] = {
+                            ...allProducts[productIndex],
+                            name,
+                            description,
+                            price,
+                            category,
+                            updatedAt: new Date().toISOString()
+                        };
+                    }
+                } else {
+                    // Add new product
+                    const newProduct = {
+                        id: Date.now(),
+                        name,
+                        description,
+                        price,
+                        category,
+                        image: fashionImages[Math.floor(Math.random() * fashionImages.length)],
+                        createdAt: new Date().toISOString()
+                    };
+                    allProducts.push(newProduct);
+                }
+                
+                // Save to Firebase
+                await firebase.database().ref('products').set(allProducts);
+                
+                // Reset form
+                document.getElementById('productForm').reset();
+                submitBtn.textContent = 'Add Product';
+                delete submitBtn.dataset.editId;
+                
+                loadProducts();
+                alert(editId ? 'Product updated successfully!' : 'Product added successfully!');
+            } catch (error) {
+                alert('Failed to save product: ' + error.message);
+            }
+        });
+
+        async function deleteProduct(id) {
+            if (confirm('Are you sure you want to delete this product?')) {
+                try {
+                    // Delete from Firebase
+                    const products = allProducts.filter(p => p.id !== id);
+                    await firebase.database().ref('products').set(products);
+                    
+                    loadProducts();
+                    alert('Product deleted successfully!');
+                } catch (error) {
+                    alert('Failed to delete product: ' + error.message);
+                }
+            }
+        }
+        
+        function editProduct(id) {
+            const product = allProducts.find(p => p.id === id);
+            if (!product) return;
+            
+            document.getElementById('productName').value = product.name;
+            document.getElementById('productDescription').value = product.description || '';
+            document.getElementById('productPrice').value = product.price;
+            document.getElementById('productCategory').value = product.category || 'clothing';
+            
+            const form = document.getElementById('productForm');
+            const submitBtn = form.querySelector('button[type="submit"]');
+            submitBtn.textContent = 'Update Product';
+            submitBtn.dataset.editId = id;
+        }
+
+        function logout() {
+            localStorage.removeItem('isAdmin');
+            window.location.href = 'admin.html';
+        }
+    </script>
+</body>
+</html>

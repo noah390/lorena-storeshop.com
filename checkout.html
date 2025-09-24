@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - Lorena Store</title>
+    <script src="https://kit.fontawesome.com/4a3b1f73a2.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Arial', sans-serif; background: #f8f9fa; color: #333; }
+        
+        .header { background: linear-gradient(135deg, #e75480, #ff6b9d); color: white; padding: 1rem 0; }
+        .header-content { max-width: 1200px; margin: 0 auto; padding: 0 1rem; }
+        .logo { font-size: 1.8rem; font-weight: bold; }
+        
+        .container { max-width: 800px; margin: 2rem auto; padding: 0 1rem; }
+        .checkout-card { background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); overflow: hidden; }
+        
+        .checkout-header { background: #e75480; color: white; padding: 1.5rem; text-align: center; }
+        .checkout-content { padding: 2rem; }
+        
+        .section { margin-bottom: 2rem; }
+        .section-title { font-size: 1.3rem; font-weight: bold; margin-bottom: 1rem; color: #333; border-bottom: 2px solid #e75480; padding-bottom: 0.5rem; }
+        
+        .form-group { margin-bottom: 1rem; }
+        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: bold; color: #555; }
+        .form-group input, .form-group textarea { width: 100%; padding: 0.8rem; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem; transition: border-color 0.3s; }
+        .form-group input:focus, .form-group textarea:focus { outline: none; border-color: #e75480; }
+        
+        .order-summary { background: #f8f9fa; border-radius: 8px; padding: 1.5rem; }
+        .order-item { display: flex; justify-content: between; align-items: center; padding: 1rem 0; border-bottom: 1px solid #eee; }
+        .order-item:last-child { border-bottom: none; }
+        .item-info { flex: 1; }
+        .item-name { font-weight: bold; margin-bottom: 0.3rem; }
+        .item-details { color: #666; font-size: 0.9rem; }
+        .item-total { font-weight: bold; color: #e75480; }
+        
+        .total-section { background: #e75480; color: white; padding: 1rem; margin: 1rem -1.5rem -2rem -1.5rem; text-align: center; }
+        .total-amount { font-size: 1.5rem; font-weight: bold; }
+        
+        .btn { background: #25d366; color: white; border: none; padding: 1rem 2rem; border-radius: 8px; font-size: 1.1rem; cursor: pointer; transition: all 0.3s; }
+        .btn:hover { background: #128c7e; transform: translateY(-2px); }
+        .btn:disabled { background: #ccc; cursor: not-allowed; transform: none; }
+        
+        .btn-secondary { background: #6c757d; }
+        .btn-secondary:hover { background: #5a6268; }
+        
+        .button-group { display: flex; gap: 1rem; justify-content: center; margin-top: 2rem; }
+        
+        .empty-cart { text-align: center; padding: 3rem; color: #666; }
+        
+        @media (max-width: 768px) {
+            .container { padding: 0 0.5rem; }
+            .checkout-content { padding: 1rem; }
+            .button-group { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div class="logo">
+                <i class="fas fa-gem"></i>
+                Lorena Store - Checkout
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="checkout-card">
+            <div class="checkout-header">
+                <h2><i class="fas fa-shopping-cart"></i> Complete Your Order</h2>
+            </div>
+            
+            <div class="checkout-content">
+                <div id="checkout-form">
+                    <!-- Customer Information -->
+                    <div class="section">
+                        <h3 class="section-title"><i class="fas fa-user"></i> Customer Information</h3>
+                        <div class="form-group">
+                            <label for="customerName">Full Name *</label>
+                            <input type="text" id="customerName" required placeholder="Enter your full name">
+                        </div>
+                        <div class="form-group">
+                            <label for="customerPhone">Phone Number *</label>
+                            <input type="tel" id="customerPhone" required placeholder="e.g., 08012345678">
+                        </div>
+                        <div class="form-group">
+                            <label for="customerEmail">Email Address *</label>
+                            <input type="email" id="customerEmail" required placeholder="your.email@example.com">
+                        </div>
+                        <div class="form-group">
+                            <label for="customerAddress">Delivery Address</label>
+                            <textarea id="customerAddress" rows="3" placeholder="Enter your delivery address (optional)"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Order Summary -->
+                    <div class="section">
+                        <h3 class="section-title"><i class="fas fa-receipt"></i> Order Summary</h3>
+                        <div id="order-summary" class="order-summary">
+                            <div class="empty-cart">Loading order details...</div>
+                        </div>
+                    </div>
+
+                    <div class="button-group">
+                        <button class="btn btn-secondary" onclick="window.location.href='store.html'">
+                            <i class="fas fa-arrow-left"></i> Back to Store
+                        </button>
+                        <button id="whatsapp-btn" class="btn" onclick="processWhatsAppCheckout()">
+                            <i class="fab fa-whatsapp"></i> Order via WhatsApp
+                        </button>
+                        <button id="email-btn" class="btn" onclick="showEmailForm()" style="background: #007bff;">
+                            <i class="fas fa-envelope"></i> Order via Email
+                        </button>
+                    </div>
+                    
+                    <!-- Email Order Form -->
+                    <div id="email-form" style="display: none; margin-top: 2rem; padding: 2rem; background: #f8f9fa; border-radius: 8px;">
+                        <h3 style="margin-bottom: 1rem; color: #333;"><i class="fas fa-envelope"></i> Order via Email</h3>
+                        <form id="formspree-form" action="https://formspree.io/f/spanishfrenchexpress@gmail.com" method="POST">
+                            <input type="hidden" name="_subject" value="New Order from Lorena Store">
+                            <input type="hidden" id="order-details" name="order-details">
+                            
+                            <div class="form-group">
+                                <label>Full Name *</label>
+                                <input type="text" name="customer-name" id="email-name" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Phone Number *</label>
+                                <input type="tel" name="customer-phone" id="email-phone" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Email Address *</label>
+                                <input type="email" name="customer-email" id="email-email" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Delivery Address</label>
+                                <textarea name="customer-address" id="email-address" rows="3"></textarea>
+                            </div>
+                            
+                            <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                                <button type="button" class="btn btn-secondary" onclick="hideEmailForm()">Cancel</button>
+                                <button type="submit" class="btn" style="background: #007bff;">
+                                    <i class="fas fa-paper-plane"></i> Send Order
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div id="empty-cart" class="empty-cart" style="display: none;">
+                    <i class="fas fa-shopping-cart" style="font-size: 3rem; color: #ddd; margin-bottom: 1rem;"></i>
+                    <h3>Your cart is empty</h3>
+                    <p>Add some products to your cart to proceed with checkout.</p>
+                    <button class="btn" onclick="window.location.href='store.html'" style="margin-top: 1rem;">
+                        <i class="fas fa-shopping-bag"></i> Continue Shopping
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/demo-data.js"></script>
+    <script src="js/whatsapp-checkout.js"></script>
+    <script src="js/live-chat.js"></script>
+    <script>
+        let whatsappCheckout;
+
+        // Initialize checkout page
+        async function initCheckout() {
+            whatsappCheckout = new WhatsAppCheckout();
+            await whatsappCheckout.loadProducts();
+            displayOrderSummary();
+        }
+
+        // Display order summary
+        function displayOrderSummary() {
+            const { items, total } = whatsappCheckout.getCartItems();
+            const summaryContainer = document.getElementById('order-summary');
+            const checkoutForm = document.getElementById('checkout-form');
+            const emptyCart = document.getElementById('empty-cart');
+
+            if (items.length === 0) {
+                checkoutForm.style.display = 'none';
+                emptyCart.style.display = 'block';
+                return;
+            }
+
+            let summaryHTML = '';
+            items.forEach(item => {
+                summaryHTML += `
+                    <div class="order-item">
+                        <div class="item-info">
+                            <div class="item-name">${item.name}</div>
+                            <div class="item-details">Quantity: ${item.quantity} × ₦${item.price.toLocaleString()}</div>
+                        </div>
+                        <div class="item-total">₦${item.total.toLocaleString()}</div>
+                    </div>
+                `;
+            });
+
+            summaryHTML += `
+                <div class="total-section">
+                    <div class="total-amount">Total: ₦${total.toLocaleString()}</div>
+                </div>
+            `;
+
+            summaryContainer.innerHTML = summaryHTML;
+        }
+
+        // Process WhatsApp checkout
+        function processWhatsAppCheckout() {
+            const name = document.getElementById('customerName').value.trim();
+            const phone = document.getElementById('customerPhone').value.trim();
+            const email = document.getElementById('customerEmail').value.trim();
+            const address = document.getElementById('customerAddress').value.trim();
+
+            // Validation
+            if (!name || !phone || !email) {
+                alert('Please fill in all required fields (Name, Phone, Email)');
+                return;
+            }
+
+            // Email validation
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                alert('Please enter a valid email address');
+                return;
+            }
+
+            // Phone validation (basic)
+            const phoneRegex = /^[0-9]{10,11}$/;
+            if (!phoneRegex.test(phone.replace(/\D/g, ''))) {
+                alert('Please enter a valid phone number (10-11 digits)');
+                return;
+            }
+
+            try {
+                const customerInfo = { name, phone, email, address };
+                const result = whatsappCheckout.processCheckout(customerInfo);
+
+                // Show success message
+                alert(`Thank you ${name}! Your order has been prepared. You will now be redirected to WhatsApp to complete your purchase.`);
+
+                // Redirect to WhatsApp
+                window.open(result.whatsappLink, '_blank');
+
+                // Redirect to success page after a short delay
+                setTimeout(() => {
+                    window.location.href = 'order-success.html';
+                }, 2000);
+
+            } catch (error) {
+                alert('Error processing your order: ' + error.message);
+            }
+        }
+
+        // Show email form
+        function showEmailForm() {
+            const emailForm = document.getElementById('email-form');
+            const { items, total } = whatsappCheckout.getCartItems();
+            
+            if (items.length === 0) {
+                alert('Your cart is empty!');
+                return;
+            }
+            
+            // Pre-fill form with checkout data
+            document.getElementById('email-name').value = document.getElementById('customerName').value;
+            document.getElementById('email-phone').value = document.getElementById('customerPhone').value;
+            document.getElementById('email-email').value = document.getElementById('customerEmail').value;
+            document.getElementById('email-address').value = document.getElementById('customerAddress').value;
+            
+            // Prepare order details for email
+            let orderDetails = `NEW ORDER FROM LORENA STORE\n\n`;
+            orderDetails += `Order Items:\n`;
+            items.forEach((item, index) => {
+                orderDetails += `${index + 1}. ${item.name}\n`;
+                orderDetails += `   Quantity: ${item.quantity} × ₦${item.price.toLocaleString()}\n`;
+                orderDetails += `   Subtotal: ₦${item.total.toLocaleString()}\n\n`;
+            });
+            orderDetails += `Total Amount: ₦${total.toLocaleString()}\n\n`;
+            orderDetails += `Order Date: ${new Date().toLocaleDateString()}\n`;
+            orderDetails += `Order Time: ${new Date().toLocaleTimeString()}`;
+            
+            document.getElementById('order-details').value = orderDetails;
+            emailForm.style.display = 'block';
+            emailForm.scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        // Hide email form
+        function hideEmailForm() {
+            document.getElementById('email-form').style.display = 'none';
+        }
+        
+        // Handle form submission
+        document.getElementById('formspree-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            
+            // Show loading state
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+            submitBtn.disabled = true;
+            
+            fetch(this.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    // Clear cart
+                    localStorage.removeItem('cart');
+                    
+                    // Show success message
+                    alert('Order sent successfully! We will contact you shortly to confirm your order.');
+                    
+                    // Redirect to success page
+                    window.location.href = 'order-success-email.html';
+                } else {
+                    throw new Error('Failed to send order');
+                }
+            })
+            .catch(error => {
+                alert('Error sending order. Please try again or contact us directly.');
+                console.error('Form submission error:', error);
+            })
+            .finally(() => {
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            });
+        });
+        
+        // Initialize when page loads
+        initCheckout();
+    </script>
+</body>
+</html>

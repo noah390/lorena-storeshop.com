@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Website Optimization - Lorena Store</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; }
+        .btn { padding: 15px 30px; margin: 10px; background: #e75480; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; }
+        .result { margin: 20px 0; padding: 15px; border-radius: 5px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+        .section { margin: 30px 0; padding: 20px; border: 1px solid #ddd; border-radius: 10px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Website Speed & Firebase Optimization</h1>
+        
+        <div class="section">
+            <h3>🔥 Firebase Data Management</h3>
+            <button class="btn" onclick="initializeFirestore()">Initialize Firestore Collections</button>
+            <button class="btn" onclick="testFirestoreSpeed()">Test Firestore Speed</button>
+            <button class="btn" onclick="clearCache()">Clear Cache</button>
+        </div>
+        
+        <div class="section">
+            <h3>👥 User Data Verification</h3>
+            <button class="btn" onclick="checkUsersCollection()">Check Users Collection</button>
+            <button class="btn" onclick="checkUserSessions()">Check User Sessions</button>
+            <button class="btn" onclick="createTestUser()">Create Test User</button>
+        </div>
+        
+        <div class="section">
+            <h3>🛍️ Products Management</h3>
+            <button class="btn" onclick="checkProductsCollection()">Check Products Collection</button>
+            <button class="btn" onclick="addSampleProducts()">Add Sample Products</button>
+            <button class="btn" onclick="testProductsSpeed()">Test Products Loading Speed</button>
+        </div>
+        
+        <div class="section">
+            <h3>⚡ Performance Tests</h3>
+            <button class="btn" onclick="testGoogleLogin()">Test Google Login</button>
+            <button class="btn" onclick="testEmailSignup()">Test Email Signup</button>
+            <button class="btn" onclick="measurePageSpeed()">Measure Page Speed</button>
+        </div>
+        
+        <div id="results"></div>
+    </div>
+
+    <!-- Firebase Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-storage-compat.js"></script>
+    <script src="firebase-config.js"></script>
+
+    <script>
+        function showResult(message, type = 'success') {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `result ${type}`;
+            div.innerHTML = `<strong>${new Date().toLocaleTimeString()}</strong>: ${message}`;
+            results.appendChild(div);
+            div.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        async function initializeFirestore() {
+            try {
+                const { db } = window.firebaseServices;
+                
+                // Create indexes and initial collections
+                const collections = ['users', 'products', 'userSessions', 'orders'];
+                
+                for (const collectionName of collections) {
+                    const testDoc = await db.collection(collectionName).doc('_init').set({
+                        initialized: true,
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                }
+                
+                showResult('✅ Firestore collections initialized successfully!');
+            } catch (error) {
+                showResult('❌ Error initializing Firestore: ' + error.message, 'error');
+            }
+        }
+
+        async function testFirestoreSpeed() {
+            try {
+                const { db } = window.firebaseServices;
+                const startTime = performance.now();
+                
+                // Test read speed
+                const snapshot = await db.collection('users').limit(1).get();
+                const readTime = performance.now() - startTime;
+                
+                // Test write speed
+                const writeStart = performance.now();
+                await db.collection('_test').doc('speed').set({
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                    test: 'speed'
+                });
+                const writeTime = performance.now() - writeStart;
+                
+                showResult(`⚡ Firestore Speed Test:<br>
+                    📖 Read: ${readTime.toFixed(2)}ms<br>
+                    ✍️ Write: ${writeTime.toFixed(2)}ms`, 'info');
+                    
+            } catch (error) {
+                showResult('❌ Speed test failed: ' + error.message, 'error');
+            }
+        }
+
+        async function checkUsersCollection() {
+            try {
+                const { db } = window.firebaseServices;
+                const snapshot = await db.collection('users').get();
+                
+                showResult(`👥 Users Collection:<br>
+                    📊 Total Users: ${snapshot.size}<br>
+                    🔗 <a href="https://console.firebase.google.com/project/lorena-store-9124a/firestore/data/~2Fusers" target="_blank">View in Firebase Console</a>`, 'info');
+                    
+                // Show sample user data
+                if (!snapshot.empty) {
+                    const sampleUser = snapshot.docs[0].data();
+                    showResult(`📋 Sample User Data:<br>
+                        Name: ${sampleUser.name || 'N/A'}<br>
+                        Email: ${sampleUser.email || 'N/A'}<br>
+                        Provider: ${sampleUser.provider || 'N/A'}<br>
+                        Created: ${sampleUser.createdAt ? new Date(sampleUser.createdAt.seconds * 1000).toLocaleString() : 'N/A'}`, 'info');
+                }
+            } catch (error) {
+                showResult('❌ Error checking users: ' + error.message, 'error');
+            }
+        }
+
+        async function checkUserSessions() {
+            try {
+                const { db } = window.firebaseServices;
+                const snapshot = await db.collection('userSessions').get();
+                const onlineUsers = await db.collection('userSessions').where('isOnline', '==', true).get();
+                
+                showResult(`🔄 User Sessions:<br>
+                    📊 Total Sessions: ${snapshot.size}<br>
+                    🟢 Online Users: ${onlineUsers.size}<br>
+                    🔗 <a href="https://console.firebase.google.com/project/lorena-store-9124a/firestore/data/~2FuserSessions" target="_blank">View in Firebase Console</a>`, 'info');
+            } catch (error) {
+                showResult('❌ Error checking sessions: ' + error.message, 'error');
+            }
+        }
+
+        async function checkProductsCollection() {
+            try {
+                const { db } = window.firebaseServices;
+                const snapshot = await db.collection('products').get();
+                
+                showResult(`🛍️ Products Collection:<br>
+                    📊 Total Products: ${snapshot.size}<br>
+                    🔗 <a href="https://console.firebase.google.com/project/lorena-store-9124a/firestore/data/~2Fproducts" target="_blank">View in Firebase Console</a>`, 'info');
+                    
+                if (!snapshot.empty) {
+                    const sampleProduct = snapshot.docs[0].data();
+                    showResult(`📋 Sample Product:<br>
+                        Name: ${sampleProduct.name || 'N/A'}<br>
+                        Price: ₦${sampleProduct.price || 'N/A'}<br>
+                        Created: ${sampleProduct.createdAt ? new Date(sampleProduct.createdAt.seconds * 1000).toLocaleString() : 'N/A'}`, 'info');
+                }
+            } catch (error) {
+                showResult('❌ Error checking products: ' + error.message, 'error');
+            }
+        }
+
+        async function createTestUser() {
+            try {
+                const { auth, db } = window.firebaseServices;
+                const testEmail = `test${Date.now()}@example.com`;
+                
+                const userCredential = await auth.createUserWithEmailAndPassword(testEmail, '123456');
+                const user = userCredential.user;
+                
+                await db.collection('users').doc(user.uid).set({
+                    name: 'Test User',
+                    email: testEmail,
+                    provider: 'email',
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    phone: ''
+                });
+                
+                showResult(`✅ Test user created successfully!<br>
+                    📧 Email: ${testEmail}<br>
+                    🆔 UID: ${user.uid}`, 'success');
+                    
+                // Sign out the test user
+                await auth.signOut();
+            } catch (error) {
+                showResult('❌ Error creating test user: ' + error.message, 'error');
+            }
+        }
+
+        async function addSampleProducts() {
+            try {
+                const { db } = window.firebaseServices;
+                const sampleProducts = [
+                    {
+                        name: 'Premium Dress',
+                        description: 'Elegant premium dress for special occasions',
+                        price: 25000,
+                        imageURL: 'https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=400',
+                        featured: true,
+                        category: 'dresses'
+                    },
+                    {
+                        name: 'Luxury Handbag',
+                        description: 'Designer luxury handbag with premium materials',
+                        price: 35000,
+                        imageURL: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=400',
+                        featured: true,
+                        category: 'bags'
+                    }
+                ];
+                
+                const batch = db.batch();
+                sampleProducts.forEach(product => {
+                    const docRef = db.collection('products').doc();
+                    batch.set(docRef, {
+                        ...product,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                });
+                
+                await batch.commit();
+                showResult('✅ Sample products added successfully!', 'success');
+            } catch (error) {
+                showResult('❌ Error adding products: ' + error.message, 'error');
+            }
+        }
+
+        async function testGoogleLogin() {
+            try {
+                const { auth, googleProvider } = window.firebaseServices;
+                showResult('🔄 Testing Google login... (popup will appear)', 'info');
+                
+                const result = await auth.signInWithPopup(googleProvider);
+                const user = result.user;
+                
+                showResult(`✅ Google login successful!<br>
+                    👤 Name: ${user.displayName}<br>
+                    📧 Email: ${user.email}`, 'success');
+                    
+                await auth.signOut();
+            } catch (error) {
+                showResult('❌ Google login failed: ' + error.message, 'error');
+            }
+        }
+
+        function clearCache() {
+            localStorage.removeItem('liveProducts');
+            localStorage.removeItem('productsCache');
+            localStorage.removeItem('cart');
+            showResult('✅ Cache cleared successfully!', 'success');
+        }
+
+        function measurePageSpeed() {
+            const loadTime = performance.timing.loadEventEnd - performance.timing.navigationStart;
+            const domReady = performance.timing.domContentLoadedEventEnd - performance.timing.navigationStart;
+            
+            showResult(`⚡ Page Performance:<br>
+                🚀 Total Load Time: ${loadTime}ms<br>
+                📄 DOM Ready: ${domReady}ms<br>
+                💾 Memory Usage: ${(performance.memory?.usedJSHeapSize / 1024 / 1024).toFixed(2) || 'N/A'} MB`, 'info');
+        }
+
+        // Wait for Firebase to load
+        function waitForFirebase() {
+            if (window.firebaseServices) {
+                showResult('🔥 Firebase services loaded successfully!', 'success');
+                showResult(`🔗 <strong>Firebase Console:</strong> <a href="https://console.firebase.google.com/project/lorena-store-9124a/database" target="_blank">View Database</a>`, 'info');
+            } else {
+                setTimeout(waitForFirebase, 100);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', waitForFirebase);
+    </script>
+</body>
+</html>

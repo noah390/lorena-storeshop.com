@@ -23,16 +23,42 @@ class AuthManager {
         }
         return false;
     }
+    
+    static logout() {
+        localStorage.removeItem('currentUser');
+        localStorage.removeItem('isLoggedIn');
+        window.location.href = 'login.html';
+    }
+    
+    // Register user with simple sync
+    static async registerUser(name, identifier, password) {
+        return await SimpleUsersAPI.registerUser(name, identifier, password);
+    }
+    
+    // Login user with simple sync
+    static async loginUser(identifier, password) {
+        return await SimpleUsersAPI.loginUser(identifier, password);
+    }
 }
 
 // Protect pages that require authentication
 function protectPage() {
-    const allowedPages = ['index.html', 'login.html', 'register.html', 'admin.html', 'admin_dashboard.html'];
+    const allowedPages = ['index.html', 'login.html', 'register.html', 'admin-login.html', 'admin-dashboard.html', 'forgot-password.html', 'verify-access.html', ''];
     const currentPage = window.location.pathname.split('/').pop() || 'index.html';
     
     // Allow access to home page and auth pages without login
-    if (allowedPages.includes(currentPage)) {
+    if (allowedPages.includes(currentPage) || currentPage === '') {
         return true;
+    }
+    
+    // Check if access verification is required
+    const accessVerified = localStorage.getItem('accessVerified');
+    if (!accessVerified || Date.now() > parseInt(accessVerified)) {
+        // Require verification for sensitive pages
+        if (currentPage === 'profile.html' || currentPage.includes('admin')) {
+            window.location.href = `verify-access.html?redirect=${currentPage}`;
+            return false;
+        }
     }
     
     // All other pages require authentication
@@ -52,7 +78,7 @@ document.addEventListener('click', function(e) {
     const href = link.getAttribute('href');
     if (!href || href.startsWith('#') || href.startsWith('http') || href.startsWith('mailto')) return;
     
-    const allowedPages = ['index.html', 'login.html', 'register.html', 'admin.html', 'admin_dashboard.html'];
+    const allowedPages = ['index.html', 'login.html', 'register.html', 'admin-login.html', 'admin-dashboard.html', 'forgot-password.html', 'verify-access.html'];
     const targetPage = href.split('/').pop();
     
     if (!allowedPages.includes(targetPage) && !AuthManager.checkAuth()) {

@@ -20,30 +20,38 @@ body
     text-align: center;
     width: 100%;
     display: grid;
-    grid-gap: 10px;
+    grid-gap: 15px;
     grid-template-columns: 1.5fr 2fr 4fr 1fr;
     font-family: 'Lato', sans-serif;
-    z-index: 1;
     justify-content: space-between;
     align-items: center;
-    padding: 15px 40px;
+    padding: 20px 40px;
     box-sizing: border-box;
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
-    box-shadow: 0 1px 2px 0 rgba(60, 64, 67, 0.302), 0 2px 6px 2px rgba(60, 64, 67, 0.149);
-    z-index: 1000; 
+    box-shadow: 0 2px 8px 0 rgba(60, 64, 67, 0.302), 0 4px 12px 4px rgba(60, 64, 67, 0.149);
+    z-index: 1000;
+    min-height: 80px;
 }
 #shopName 
 {
-    font-size: 40px; 
-    font-family: 'Lato', sans-serif;
+    font-size: 48px; 
+    font-family: 'Pacifico', cursive;
+    font-weight: 400;
+    color: #e75480 !important;
 }
 #shopName a
 {
     text-decoration: none;
-    color: rgb(29, 29, 29);
+    color: #e75480 !important;
+    transition: opacity 0.3s;
+}
+
+#shopName a:hover
+{
+    opacity: 0.8;
 }
 #shopName > b
 {
@@ -55,13 +63,29 @@ body
 {
     font-weight: bold;
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 10px;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+    font-size: 16px;
 }
 #collection a
 {
     text-decoration: none;
-    color: rgb(29, 29, 29);
+    color: #000 !important;
+    font-weight: 600;
+    padding: 10px 15px;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: block;
+    font-size: 14px;
+}
+
+#collection a:hover
+{
+    background: #e75480;
+    color: white !important;
+    transform: translateY(-2px);
 }
 
 .search
@@ -118,7 +142,7 @@ body
 {
     #collection
     {
-        font-size: 13px;
+        font-size: 15px;
     }
     #input 
     {
@@ -129,7 +153,7 @@ body
 {
     #collection
     {
-        font-size: 13px;
+        font-size: 14px;
     }
     #input 
     {
@@ -147,22 +171,29 @@ body
     #container
     {
         display: grid;
-        grid-template-columns: 1fr 2fr 0.5fr;
+        grid-template-columns: 1.2fr 2fr 0.8fr;
+        gap: 10px;
     }
     #search
     {
         display: none;
+    }
+    #collection
+    {
+        grid-template-columns: repeat(5, 1fr);
+        gap: 6px;
     }
 }
 @media(max-width: 750px)
 {
     #shopName
     {
-        font-size: 28px;
+        font-size: 32px;
     }
     #collection
     {
-        font-size: 12px;
+        font-size: 13px;
+        gap: 8px;
     }
     .userIcon
     {
@@ -173,17 +204,27 @@ body
         font-size: 1.2em;
         margin: 10px 20px;
     }
+    #container
+    {
+        padding: 15px 25px;
+        min-height: 70px;
+    }
 }
 
 @media(max-width: 650px)
 {
     #shopName
     {
-        font-size: 24px;
+        font-size: 28px;
     }
     #collection
     {
-        font-size: 10px;
+        font-size: 12px;
+        gap: 6px;
+    }
+    #collection a
+    {
+        padding: 6px 8px;
     }
     .userIcon
     {
@@ -320,14 +361,60 @@ body
     color: #222;
 }
 #user a {
-    color: #222 !important;
+    color: #333 !important;
     font-weight: bold;
-    font-size: 1.1em;
-    text-shadow: 0 1px 2px #fff, 0 0 2px #e75480;
+    font-size: 1.2em;
+    transition: color 0.3s;
 }
-#collection a {
+
+#user a:hover {
+    color: #e75480 !important;
+}
+
+
+/* Mobile Menu Styles */
+#mobileMenuToggle {
+    cursor: pointer;
+    font-size: 24px;
+    color: #e75480;
+    padding: 10px;
+    z-index: 1001;
+}
+
+#mobileMenu {
+    position: fixed;
+    top: 70px;
+    left: 0;
+    right: 0;
+    background: white;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    z-index: 999;
+    border-top: 1px solid #eee;
+}
+
+.mobile-menu-item {
+    padding: 15px 20px;
+    border-bottom: 1px solid #eee;
+    text-align: center;
+}
+
+.mobile-menu-item:last-child {
+    border-bottom: none;
+}
+
+.mobile-menu-item a {
     text-decoration: none;
-    color: #222 !important;
+    color: #222;
     font-weight: bold;
-    text-shadow: 0 1px 2px #fff, 0 0 2px #e75480;
+    font-size: 16px;
+    display: block;
+    width: 100%;
+}
+
+.mobile-menu-item:hover {
+    background: #f8f9fa;
+}
+
+.mobile-menu-item a:hover {
+    color: #e75480;
 }

@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head><title>Fix Firebase</title></head>
+<body>
+<h1>Fixing Firebase...</h1>
+<div id="status">Connecting...</div>
+<script src="fix-firebase-now.js"></script>
+<script>
+setTimeout(() => {
+    document.getElementById('status').innerHTML = 'Check console for results. If blocked, update Firebase rules manually.';
+}, 3000);
+</script>
+</body>
+</html>

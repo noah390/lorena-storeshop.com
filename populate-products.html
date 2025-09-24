@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Populate Firebase - Lorena Store</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f4f6fb; margin: 0; padding: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+        .container { max-width: 500px; width: 90%; background: white; padding: 40px; border-radius: 10px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); text-align: center; }
+        h2 { color: #e75480; margin-bottom: 20px; }
+        button { width: 100%; padding: 15px; background: #e75480; color: white; border: none; border-radius: 5px; font-size: 16px; cursor: pointer; margin: 10px 0; }
+        button:hover { background: #d63384; }
+        .status { margin: 20px 0; padding: 15px; border-radius: 5px; }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>🔥 Firebase Setup</h2>
+        <p>Click the button below to populate your Firebase database with sample products for Lorena Store.</p>
+        
+        <button onclick="populateNow()">🚀 Populate Firebase Database</button>
+        <button onclick="checkProducts()">📦 Check Current Products</button>
+        
+        <div id="status"></div>
+        
+        <p style="margin-top: 30px;">
+            <a href="admin-login.html" style="color: #e75480;">← Back to Admin</a> |
+            <a href="index.html" style="color: #e75480;">Home</a>
+        </p>
+    </div>
+
+    <!-- Firebase Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="js/firebase-products.js"></script>
+    <script src="js/populate-firebase.js"></script>
+
+    <script>
+        function showStatus(message, type = 'info') {
+            const statusEl = document.getElementById('status');
+            statusEl.innerHTML = `<div class="${type}">${message}</div>`;
+        }
+        
+        async function populateNow() {
+            showStatus('🔄 Populating Firebase database...', 'info');
+            try {
+                await populateFirebase();
+                showStatus('✅ Firebase database populated successfully with 8 sample products!', 'success');
+            } catch (error) {
+                showStatus('❌ Error: ' + error.message, 'error');
+            }
+        }
+        
+        async function checkProducts() {
+            showStatus('🔄 Checking Firebase database...', 'info');
+            try {
+                const products = await FirebaseProductsAPI.getProducts();
+                showStatus(`📦 Found ${products.length} products in Firebase database`, 'info');
+            } catch (error) {
+                showStatus('❌ Error checking products: ' + error.message, 'error');
+            }
+        }
+    </script>
+</body>
+</html>

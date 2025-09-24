@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Manual Firebase Fix</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 2rem auto; padding: 1rem; }
+        .step { background: #f8f9fa; padding: 1rem; margin: 1rem 0; border-radius: 8px; border-left: 4px solid #e75480; }
+        .code { background: #000; color: #0f0; padding: 1rem; border-radius: 8px; font-family: monospace; margin: 1rem 0; }
+        button { background: #e75480; color: white; padding: 1rem 2rem; border: none; border-radius: 8px; cursor: pointer; font-size: 1rem; margin: 0.5rem; }
+        .success { color: green; font-weight: bold; }
+        .error { color: red; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>🔧 Fix Firebase Permissions</h1>
+    
+    <div class="step">
+        <h3>Step 1: Open Firebase Console</h3>
+        <button onclick="window.open('https://console.firebase.google.com/project/lorena-store-9124a/database/lorena-store-9124a-default-rtdb/rules')">Open Firebase Rules</button>
+    </div>
+
+    <div class="step">
+        <h3>Step 2: Copy & Paste These Rules</h3>
+        <div class="code" onclick="copyRules()">
+{
+  "rules": {
+    ".read": true,
+    ".write": true
+  }
+}
+        </div>
+        <button onclick="copyRules()">Copy Rules</button>
+    </div>
+
+    <div class="step">
+        <h3>Step 3: Click "Publish" in Firebase</h3>
+        <p>After pasting the rules, click the blue "Publish" button.</p>
+    </div>
+
+    <div class="step">
+        <h3>Step 4: Test Firebase</h3>
+        <button onclick="testFirebase()">Test Connection</button>
+        <div id="test-result"></div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDSQ0LE6OgOlWBjFCSF8XuXRBjBqKVVMpE",
+            authDomain: "lorena-store-9124a.firebaseapp.com",
+            databaseURL: "https://lorena-store-9124a-default-rtdb.firebaseio.com/",
+            projectId: "lorena-store-9124a"
+        };
+        firebase.initializeApp(firebaseConfig);
+
+        function copyRules() {
+            const rules = `{
+  "rules": {
+    ".read": true,
+    ".write": true
+  }
+}`;
+            navigator.clipboard.writeText(rules);
+            alert('Rules copied! Paste in Firebase Console.');
+        }
+
+        function testFirebase() {
+            const result = document.getElementById('test-result');
+            result.innerHTML = 'Testing...';
+            
+            firebase.database().ref('test').set({
+                status: 'working',
+                timestamp: Date.now()
+            }).then(() => {
+                result.innerHTML = '<div class="success">✅ Firebase is working!</div>';
+                populateProducts();
+            }).catch(error => {
+                result.innerHTML = `<div class="error">❌ Still blocked: ${error.message}</div>`;
+            });
+        }
+
+        function populateProducts() {
+            const products = [
+                {id: 1, name: "Elegant Dress", price: 15000, image: "https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=400"},
+                {id: 2, name: "Designer Handbag", price: 25000, image: "https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=400"},
+                {id: 3, name: "Stylish Shoes", price: 18000, image: "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=400"},
+                {id: 4, name: "Fashion Jewelry", price: 8000, image: "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400"}
+            ];
+            
+            firebase.database().ref('products').set(products)
+            .then(() => {
+                document.getElementById('test-result').innerHTML += '<div class="success">✅ Products populated!</div>';
+            });
+        }
+    </script>
+</body>
+</html>

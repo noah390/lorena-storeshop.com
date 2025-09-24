@@ -60,71 +60,138 @@ let containerClothing = document.getElementById("containerClothing");
 let containerAccessories = document.getElementById("containerAccessories");
 // mainContainer.appendChild(dynamicClothingSection('hello world!!'))
 
-// BACKEND CALLING
-
-let httpRequest = new XMLHttpRequest();
-
-httpRequest.onreadystatechange = function() {
-  if (this.readyState === 4) {
-    if (this.status == 200) {
-      // console.log('call successful');
-      contentTitle = JSON.parse(this.responseText);
-      if (document.cookie.indexOf(",counter=") >= 0) {
-        var counter = document.cookie.split(",")[1].split("=")[1];
-        document.getElementById("badge").innerHTML = counter;
-      }
-      for (let i = 0; i < contentTitle.length; i++) {
-        if (contentTitle[i].isAccessory) {
-          console.log(contentTitle[i]);
-          if(containerAccessories) containerAccessories.appendChild(
-            dynamicClothingSection(contentTitle[i])
-          );
-        } else {
-          console.log(contentTitle[i]);
-          if(containerClothing) containerClothing.appendChild(
-            dynamicClothingSection(contentTitle[i])
-          );
-        }
+// FIREBASE API CALLING WITH FALLBACK
+async function loadProducts() {
+  try {
+    let products = [];
+    
+    // Try Firebase first
+    if (typeof FirebaseProductsAPI !== 'undefined') {
+      try {
+        products = await FirebaseProductsAPI.getProducts();
+      } catch (firebaseError) {
+        console.log('Firebase error, using fallback:', firebaseError);
+        products = getTestProducts();
       }
     } else {
-      console.log("call failed!");
+      products = getTestProducts();
     }
-  }
-};
-httpRequest.open(
-  "GET",
-  "http://localhost:4000/api/products",
-  true
-);
-httpRequest.send();
-
-// Functions for specific page rendering
-function renderAccessories() {
-  fetch('http://localhost:4000/api/products')
-    .then(res => res.json())
-    .then(products => {
-      const container = document.getElementById('containerAccessories');
-      if(container) {
-        container.innerHTML = '';
-        products.filter(p => p.isAccessory).forEach(product => {
-          container.appendChild(dynamicClothingSection(product));
-        });
+    
+    contentTitle = products;
+    updateCartBadge();
+    
+    for (let i = 0; i < products.length; i++) {
+      const product = {
+        ...products[i],
+        preview: products[i].image || products[i].imageURL || 'https://via.placeholder.com/300x200',
+        photos: [products[i].image || products[i].imageURL || 'https://via.placeholder.com/300x200'],
+        brand: products[i].brand || 'Lorena',
+        isAccessory: products[i].isAccessory || products[i].category === 'accessories'
+      };
+      
+      if (product.isAccessory) {
+        if(containerAccessories) containerAccessories.appendChild(
+          dynamicClothingSection(product)
+        );
+      } else {
+        if(containerClothing) containerClothing.appendChild(
+          dynamicClothingSection(product)
+        );
       }
-    })
-    .catch(err => console.log('Failed to load accessories'));
+    }
+    
+    // Also populate products grid on home page
+    const productsGrid = document.getElementById('products-grid');
+    if (productsGrid) {
+      productsGrid.innerHTML = '';
+      products.slice(0, 8).forEach(product => {
+        const productData = {
+          ...product,
+          preview: product.image || product.imageURL || 'https://via.placeholder.com/300x200',
+          brand: product.brand || 'Lorena'
+        };
+        productsGrid.appendChild(dynamicClothingSection(productData));
+      });
+    }
+  } catch (error) {
+    console.log('Failed to load products:', error);
+    loadTestProducts();
+  }
 }
 
-function renderClothing() {
-  fetch('http://localhost:4000/api/products')
-    .then(res => res.json())
-    .then(products => {
-      const container = document.getElementById('containerClothing');
-      if(container) {
-        container.innerHTML = '';
-        products.filter(p => !p.isAccessory).forEach(product => {
-          container.appendChild(dynamicClothingSection(product));
-        });
-      }
-    })
-    .catch(err => console.log('Failed to load clothing'));
+// Fallback test products
+function getTestProducts() {
+  const stored = localStorage.getItem('testProducts');
+  if (stored) return JSON.parse(stored);
+  
+  return [
+    { id: '1', name: 'Summer Dress', price: 15000, image: 'https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=400', category: 'clothing', isAccessory: false, brand: 'Lorena' },
+    { id: '2', name: 'Designer Handbag', price: 25000, image: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=400', category: 'accessories', isAccessory: true, brand: 'Lorena' },
+    { id: '3', name: 'Classic Shirt', price: 8000, image: 'https://images.unsplash.com/photo-1621072156002-e2fccdc0b176?w=400', category: 'clothing', isAccessory: false, brand: 'Lorena' },
+    { id: '4', name: 'Gold Necklace', price: 12000, image: 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400', category: 'jewelry', isAccessory: true, brand: 'Lorena' }
+  ];
+}
+
+function loadTestProducts() {
+  const products = getTestProducts();
+  const productsGrid = document.getElementById('products-grid');
+  if (productsGrid) {
+    productsGrid.innerHTML = '<div style="text-align: center; padding: 2rem; color: #e75480;">Showing test products (Firebase connection issue)</div>';
+    products.forEach(product => {
+      const productData = {
+        ...product,
+        preview: product.image,
+        photos: [product.image]
+      };
+      productsGrid.appendChild(dynamicClothingSection(productData));
+    });
+  }
+}
+
+// Load products when page loads
+loadProducts();
+
+// Functions for specific page rendering
+async function renderAccessories() {
+  try {
+    const products = await FirebaseProductsAPI.getProducts();
+    const container = document.getElementById('containerAccessories');
+    if(container) {
+      container.innerHTML = '';
+      products.filter(p => p.isAccessory || p.category === 'accessories').forEach(product => {
+        const productData = {
+          ...product,
+          preview: product.image || product.imageURL || 'https://via.placeholder.com/300x200',
+          photos: [product.image || product.imageURL || 'https://via.placeholder.com/300x200'],
+          brand: product.brand || 'Lorena',
+          isAccessory: true
+        };
+        container.appendChild(dynamicClothingSection(productData));
+      });
+    }
+  } catch (error) {
+    console.log('Failed to load accessories:', error);
+  }
+}
+
+async function renderClothing() {
+  try {
+    const products = await FirebaseProductsAPI.getProducts();
+    const container = document.getElementById('containerClothing');
+    if(container) {
+      container.innerHTML = '';
+      products.filter(p => !p.isAccessory && p.category !== 'accessories').forEach(product => {
+        const productData = {
+          ...product,
+          preview: product.image || product.imageURL || 'https://via.placeholder.com/300x200',
+          photos: [product.image || product.imageURL || 'https://via.placeholder.com/300x200'],
+          brand: product.brand || 'Lorena',
+          isAccessory: false
+        };
+        container.appendChild(dynamicClothingSection(productData));
+      });
+    }
+  } catch (error) {
+    console.log('Failed to load clothing:', error);
+  }
 }

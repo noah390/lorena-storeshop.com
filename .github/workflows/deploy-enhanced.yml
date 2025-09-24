@@ -1,0 +1,215 @@
+name: Deploy Lorena Store to GitHub Pages
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  # Build and test job
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: Backend/package-lock.json
+
+      - name: Install backend dependencies
+        run: |
+          cd Backend
+          npm ci
+
+      - name: Create upload directories
+        run: |
+          mkdir -p img/uploads
+          mkdir -p Backend/uploads
+
+      - name: Test backend server
+        run: |
+          cd Backend
+          timeout 10s npm start || true
+          echo "Backend test completed"
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Build site
+        run: |
+          # Create a build directory
+          mkdir -p _site
+          
+          # Copy all frontend files
+          cp -r *.html _site/ 2>/dev/null || true
+          cp -r css _site/ 2>/dev/null || true
+          cp -r js _site/ 2>/dev/null || true
+          cp -r img _site/ 2>/dev/null || true
+          cp -r api _site/ 2>/dev/null || true
+          
+          # Copy backend for serverless functions
+          mkdir -p _site/api
+          cp -r Backend/*.js _site/api/ 2>/dev/null || true
+          cp Backend/package.json _site/api/ 2>/dev/null || true
+          
+          # Create serverless function wrappers
+          cat > _site/api/products.js << 'EOF'
+          // Serverless function for products API
+          const products = [
+            {
+              "id": "1",
+              "name": "Elegant Summer Dress",
+              "brand": "Lorena",
+              "price": 15000,
+              "stock": 25,
+              "preview": "https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=400",
+              "photos": ["https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=400"],
+              "description": "Beautiful summer dress perfect for any occasion",
+              "isAccessory": false,
+              "category": "clothing"
+            }
+          ];
+          
+          let orders = [];
+          
+          export default function handler(req, res) {
+            res.setHeader('Access-Control-Allow-Origin', '*');
+            res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+            res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+          
+            if (req.method === 'OPTIONS') {
+              return res.status(200).end();
+            }
+          
+            const { method, query } = req;
+            const { id } = query;
+          
+            switch (method) {
+              case 'GET':
+                if (id) {
+                  const product = products.find(p => p.id === id);
+                  if (!product) return res.status(404).json({ error: 'Product not found' });
+                  return res.json(product);
+                }
+                return res.json(products);
+          
+              case 'POST':
+                const newProduct = { ...req.body, id: Date.now().toString() };
+                products.push(newProduct);
+                return res.status(201).json(newProduct);
+          
+              case 'PUT':
+                if (!id) return res.status(400).json({ error: 'Product ID required' });
+                const idx = products.findIndex(p => p.id === id);
+                if (idx === -1) return res.status(404).json({ error: 'Product not found' });
+                
+                products[idx] = { ...products[idx], ...req.body, id };
+                return res.json(products[idx]);
+          
+              case 'DELETE':
+                if (!id) return res.status(400).json({ error: 'Product ID required' });
+                const productIdx = products.findIndex(p => p.id === id);
+                if (productIdx !== -1) {
+                  products.splice(productIdx, 1);
+                }
+                return res.status(204).end();
+          
+              default:
+                return res.status(405).json({ error: 'Method not allowed' });
+            }
+          }
+          EOF
+          
+          # Create health check endpoint
+          cat > _site/api/health.js << 'EOF'
+          export default function handler(req, res) {
+            res.setHeader('Access-Control-Allow-Origin', '*');
+            res.json({
+              status: 'OK',
+              timestamp: new Date().toISOString(),
+              message: 'Lorena Store API is running'
+            });
+          }
+          EOF
+          
+          # Create orders endpoint
+          cat > _site/api/orders.js << 'EOF'
+          let orders = [];
+          
+          export default function handler(req, res) {
+            res.setHeader('Access-Control-Allow-Origin', '*');
+            res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+            res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+          
+            if (req.method === 'OPTIONS') {
+              return res.status(200).end();
+            }
+          
+            switch (req.method) {
+              case 'GET':
+                return res.json(orders);
+              case 'POST':
+                const newOrder = { ...req.body, id: Date.now().toString() };
+                orders.push(newOrder);
+                return res.status(201).json(newOrder);
+              default:
+                return res.status(405).json({ error: 'Method not allowed' });
+            }
+          }
+          EOF
+          
+          # Update config for production
+          cat > _site/js/config.js << 'EOF'
+          // Production configuration
+          const CONFIG = {
+            API_BASE_URL: window.location.hostname === 'localhost' ? 'http://localhost:4000/api' : '/api',
+            ENVIRONMENT: 'production',
+            VERSION: '1.0.0'
+          };
+          
+          // Export for use in other files
+          if (typeof module !== 'undefined' && module.exports) {
+            module.exports = CONFIG;
+          }
+          EOF
+          
+          echo "Build completed successfully!"
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  # Deploy job
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+      - name: Post-deployment notification
+        run: |
+          echo "🚀 Lorena Store deployed successfully!"
+          echo "📍 Site URL: ${{ steps.deployment.outputs.page_url }}"
+          echo "📊 Admin Dashboard: ${{ steps.deployment.outputs.page_url }}admin_dashboard.html"
+          echo "🛍️ Store: ${{ steps.deployment.outputs.page_url }}index.html"

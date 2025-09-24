@@ -18,16 +18,6 @@
     <script src="js/auth.js"></script>
         <!-- HEADER -->
     <div id="1"></div>
-    <script>
-        load("header.html");
-        function load(url)
-        {
-            req = new XMLHttpRequest();
-            req.open("GET", url, false);
-            req.send(null);
-            document.getElementById(1).innerHTML = req.responseText;
-        }
-    </script>
 
         <!-- CART CONTAINER -->
     <div id="cartMainContainer">
@@ -58,15 +48,25 @@
 </body>
     <!-- FOOTER -->
     <div id="4"></div>
+    
     <script>
-        load("footer.html");
-        function load(url)
-        {
-            req = new XMLHttpRequest();
+        function loadContent(url, elementId) {
+            const req = new XMLHttpRequest();
             req.open("GET", url, false);
             req.send(null);
-            document.getElementById(4).innerHTML = req.responseText;
+            document.getElementById(elementId).innerHTML = req.responseText;
         }
+        
+        // Load sections
+        loadContent("header.html", 1);
+        loadContent("footer.html", 4);
     </script>
-<script src="cart.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-storage-compat.js"></script>
+<script src="js/demo-data.js"></script>
+<script src="js/env-config.js"></script>
+<script src="js/config.js"></script>
+<script src="Backend/cart.js"></script>
 </html>

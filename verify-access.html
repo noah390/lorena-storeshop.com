@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify Access - Lorena Store</title>
+    <script src="https://kit.fontawesome.com/4a3b1f73a2.js"></script>
+    <link href="https://fonts.googleapis.com/css?family=Lato&display=swap" rel="stylesheet">
+    <script src="js/auth-codes.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Lato', sans-serif; background: linear-gradient(135deg, #e75480, #ff6b9d); min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+        .verify-container { background: white; padding: 2rem; border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center; }
+        .logo { margin-bottom: 2rem; }
+        .logo h1 { color: #e75480; font-size: 2rem; margin-bottom: 0.5rem; }
+        .logo p { color: #666; }
+        .security-icon { font-size: 4rem; color: #e75480; margin-bottom: 1rem; }
+        .form-group { margin-bottom: 1.5rem; }
+        .form-group label { display: block; margin-bottom: 0.5rem; color: #333; font-weight: bold; }
+        .form-group input { width: 100%; padding: 1rem; border: 2px solid #ddd; border-radius: 10px; font-size: 1rem; transition: border-color 0.3s; }
+        .form-group input:focus { outline: none; border-color: #e75480; }
+        .btn { width: 100%; background: #e75480; color: white; border: none; padding: 1rem; border-radius: 10px; font-size: 1rem; cursor: pointer; transition: background 0.3s; margin-bottom: 1rem; }
+        .btn:hover { background: #d63384; }
+        .btn:disabled { background: #ccc; cursor: not-allowed; }
+        .btn-secondary { background: #6c757d; }
+        .btn-secondary:hover { background: #5a6268; }
+        .error { background: #f8d7da; color: #721c24; padding: 0.8rem; border-radius: 8px; margin-bottom: 1rem; }
+        .success { background: #d4edda; color: #155724; padding: 0.8rem; border-radius: 8px; margin-bottom: 1rem; }
+        .code-input { text-align: center; font-size: 1.5rem; letter-spacing: 0.5rem; }
+        .timer { color: #666; margin-top: 1rem; }
+        .links { margin-top: 1.5rem; }
+        .links a { color: #e75480; text-decoration: none; }
+        .links a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <div class="verify-container">
+        <div class="logo">
+            <div class="security-icon">
+                <i class="fas fa-shield-alt"></i>
+            </div>
+            <h1>Security Verification</h1>
+            <p>Please verify your identity to continue</p>
+        </div>
+
+        <div id="message"></div>
+
+        <!-- Step 1: Request Code -->
+        <div id="requestStep">
+            <p style="margin-bottom: 1.5rem; color: #666;">For your security, we need to verify your identity before you can access the store.</p>
+            
+            <form id="requestForm">
+                <div class="form-group">
+                    <label for="contactMethod">Email or Phone Number</label>
+                    <input type="text" id="contactMethod" required placeholder="Enter your email or phone">
+                </div>
+                <button type="submit" class="btn" id="sendBtn">
+                    <i class="fas fa-paper-plane"></i> Send Verification Code
+                </button>
+            </form>
+        </div>
+
+        <!-- Step 2: Verify Code -->
+        <div id="verifyStep" style="display: none;">
+            <p style="margin-bottom: 1.5rem; color: #666;">Enter the 6-digit code sent to your device</p>
+            
+            <form id="verifyForm">
+                <div class="form-group">
+                    <label for="code">Verification Code</label>
+                    <input type="text" id="code" class="code-input" maxlength="6" required placeholder="000000">
+                </div>
+                <div class="timer" id="timer">Code expires in 10:00</div>
+                <button type="submit" class="btn" id="verifyBtn">
+                    <i class="fas fa-check"></i> Verify & Continue
+                </button>
+                <button type="button" class="btn btn-secondary" onclick="resendCode()">
+                    <i class="fas fa-redo"></i> Resend Code
+                </button>
+            </form>
+        </div>
+
+        <div class="links">
+            <p><a href="index.html">Back to Home</a></p>
+        </div>
+    </div>
+
+    <script>
+        let currentContact = '';
+        let timerInterval = null;
+        let targetPage = new URLSearchParams(window.location.search).get('redirect') || 'profile.html';
+
+        // Request verification code
+        document.getElementById('requestForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const contact = document.getElementById('contactMethod').value;
+            const sendBtn = document.getElementById('sendBtn');
+            const messageDiv = document.getElementById('message');
+            
+            sendBtn.disabled = true;
+            sendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+            
+            try {
+                await AuthCodes.sendCode(contact, 'access_verification');
+                currentContact = contact;
+                
+                messageDiv.innerHTML = '<div class="success">Verification code sent successfully!</div>';
+                document.getElementById('requestStep').style.display = 'none';
+                document.getElementById('verifyStep').style.display = 'block';
+                startTimer();
+            } catch (error) {
+                messageDiv.innerHTML = `<div class="error">${error.message}</div>`;
+                sendBtn.disabled = false;
+                sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Verification Code';
+            }
+        });
+
+        // Verify code
+        document.getElementById('verifyForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const code = document.getElementById('code').value;
+            const verifyBtn = document.getElementById('verifyBtn');
+            const messageDiv = document.getElementById('message');
+            
+            verifyBtn.disabled = true;
+            verifyBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verifying...';
+            
+            try {
+                AuthCodes.verifyCode(currentContact, code);
+                
+                // Set verification flag
+                localStorage.setItem('accessVerified', Date.now() + (30 * 60 * 1000)); // 30 minutes
+                localStorage.setItem('verifiedContact', currentContact);
+                
+                messageDiv.innerHTML = '<div class="success">Verification successful! Redirecting...</div>';
+                clearInterval(timerInterval);
+                
+                setTimeout(() => {
+                    window.location.href = targetPage;
+                }, 1500);
+            } catch (error) {
+                messageDiv.innerHTML = `<div class="error">${error.message}</div>`;
+                verifyBtn.disabled = false;
+                verifyBtn.innerHTML = '<i class="fas fa-check"></i> Verify & Continue';
+            }
+        });
+
+        function startTimer() {
+            let timeLeft = 600; // 10 minutes
+            const timerElement = document.getElementById('timer');
+            
+            timerInterval = setInterval(() => {
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                timerElement.textContent = `Code expires in ${minutes}:${seconds.toString().padStart(2, '0')}`;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    timerElement.textContent = 'Code has expired';
+                    document.getElementById('verifyBtn').disabled = true;
+                }
+                
+                timeLeft--;
+            }, 1000);
+        }
+
+        async function resendCode() {
+            try {
+                await AuthCodes.sendCode(currentContact, 'access_verification');
+                document.getElementById('message').innerHTML = '<div class="success">New verification code sent!</div>';
+                clearInterval(timerInterval);
+                startTimer();
+                document.getElementById('code').value = '';
+                document.getElementById('verifyBtn').disabled = false;
+            } catch (error) {
+                document.getElementById('message').innerHTML = `<div class="error">${error.message}</div>`;
+            }
+        }
+    </script>
+</body>
+</html>
